@@ -1,0 +1,113 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { getCurrentUserRole } from "@/lib/auth/roles";
+import { getDailyBettingLockTimeForKickoffs, getIsraelMatchDay } from "@/lib/scoring/deadlines";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import type { TournamentStage } from "@/types/tournament";
+
+export interface MatchActionState {
+  status: "idle" | "success" | "error";
+  message: string;
+}
+
+const stages = new Set<TournamentStage>([
+  "group",
+  "round_of_32",
+  "round_of_16",
+  "quarterfinal",
+  "semifinal",
+  "final",
+]);
+
+export async function addMatch(
+  _previousState: MatchActionState,
+  formData: FormData,
+): Promise<MatchActionState> {
+  const stage = String(formData.get("stage") ?? "") as TournamentStage;
+  const groupId = emptyToNull(String(formData.get("groupId") ?? ""));
+  const homeTeamId = String(formData.get("homeTeamId") ?? "");
+  const awayTeamId = String(formData.get("awayTeamId") ?? "");
+  const startsAtRaw = String(formData.get("startsAt") ?? "");
+  const sortOrder = Number(String(formData.get("sortOrder") ?? ""));
+
+  if (!stages.has(stage) || !homeTeamId || !awayTeamId || !startsAtRaw || !Number.isInteger(sortOrder)) {
+    return { status: "error", message: "Fill all required match fields." };
+  }
+
+  if (homeTeamId === awayTeamId) {
+    return { status: "error", message: "Home and away teams must be different." };
+  }
+
+  const startsAt = new Date(startsAtRaw);
+
+  if (Number.isNaN(startsAt.getTime())) {
+    return { status: "error", message: "Kickoff time is invalid." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const current = await getCurrentUserRole(supabase);
+
+  if (!current || current.role !== "admin" || !current.tournamentId) {
+    return { status: "error", message: "Only admins can add matches." };
+  }
+
+  const matchDay = getIsraelMatchDay(startsAt);
+  const dayStart = new Date(`${matchDay}T00:00:00+03:00`);
+  const nextDayStart = new Date(dayStart);
+  nextDayStart.setDate(nextDayStart.getDate() + 1);
+
+  const { data: existingMatches, error: existingError } = await supabase
+    .from("matches")
+    .select("id,starts_at")
+    .eq("tournament_id", current.tournamentId)
+    .gte("starts_at", dayStart.toISOString())
+    .lt("starts_at", nextDayStart.toISOString());
+
+  if (existingError) {
+    return { status: "error", message: existingError.message };
+  }
+
+  const dailyLockAt = getDailyBettingLockTimeForKickoffs(
+    [...(existingMatches ?? []).map((match) => new Date(match.starts_at)), startsAt],
+    dayStart,
+  );
+
+  const { error: insertError } = await supabase.from("matches").insert({
+    tournament_id: current.tournamentId,
+    stage,
+    group_id: stage === "group" ? groupId : null,
+    home_team_id: homeTeamId,
+    away_team_id: awayTeamId,
+    starts_at: startsAt.toISOString(),
+    daily_lock_at: dailyLockAt.toISOString(),
+    sort_order: sortOrder,
+    status: "scheduled",
+  });
+
+  if (insertError) {
+    return { status: "error", message: insertError.message };
+  }
+
+  if (existingMatches && existingMatches.length > 0) {
+    const { error: updateError } = await supabase
+      .from("matches")
+      .update({ daily_lock_at: dailyLockAt.toISOString() })
+      .in(
+        "id",
+        existingMatches.map((match) => match.id),
+      );
+
+    if (updateError) {
+      return { status: "error", message: updateError.message };
+    }
+  }
+
+  revalidatePath("/admin");
+  return { status: "success", message: "Match added." };
+}
+
+function emptyToNull(value: string): string | null {
+  return value.trim() ? value : null;
+}
+
