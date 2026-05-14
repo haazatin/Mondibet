@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { signOut } from "@/app/auth/actions";
+import { LeaderboardPublishPanel } from "@/app/admin/leaderboard/leaderboard-publish-panel";
 import { MatchForm } from "@/app/admin/matches/match-form";
 import { MatchList } from "@/app/admin/matches/match-list";
 import { ParticipantForm } from "@/app/admin/participants/participant-form";
@@ -9,6 +10,7 @@ import { ScoringPreview } from "@/app/admin/scoring/scoring-preview";
 import { SetupForms } from "@/app/admin/setup/setup-forms";
 import { SetupLists } from "@/app/admin/setup/setup-lists";
 import { getCurrentUserRole } from "@/lib/auth/roles";
+import { buildDraftLeaderboard } from "@/lib/leaderboard/draft";
 import { hasPublicSupabaseEnv } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -97,7 +99,7 @@ export default async function AdminPage() {
     ? await supabase
         .from("score_events")
         .select(
-          "id,source_id,category,points,reason,calculated_at,participants(display_name)",
+          "id,participant_id,source_id,category,points,reason,calculated_at,participants(display_name)",
         )
         .eq("tournament_id", current.tournamentId)
         .eq("source_type", "match")
@@ -114,6 +116,29 @@ export default async function AdminPage() {
       participants: Array.isArray(event.participants) ? event.participants[0] : event.participants,
       matches: matchesById.get(event.source_id) ?? null,
     })) ?? [];
+  const draftLeaderboardRows = buildDraftLeaderboard({
+    participants:
+      participants?.map((participant) => ({
+        id: participant.id,
+        displayName: participant.display_name,
+      })) ?? [],
+    scoreEvents:
+      scoreEvents?.map((event) => ({
+        participant_id: event.participant_id,
+        category: event.category,
+        points: event.points,
+      })) ?? [],
+  });
+  const { data: latestPublishedSnapshot } = current.tournamentId
+    ? await supabase
+        .from("leaderboard_snapshots")
+        .select("id,created_at")
+        .eq("tournament_id", current.tournamentId)
+        .eq("is_published", true)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle()
+    : { data: null };
 
   return (
     <main className="shell">
@@ -158,9 +183,13 @@ export default async function AdminPage() {
           <p>Draft score events generated from official results and submitted bets.</p>
           <ScoringPreview events={normalizedScoreEvents} />
         </article>
-        <article className="panel">
+        <article className="panel wide-panel">
           <h2>Publish Leaderboard</h2>
-          <p>Draft standings stay private until an admin publishes a snapshot.</p>
+          <p>Review draft standings and publish a snapshot for participants.</p>
+          <LeaderboardPublishPanel
+            draftRows={draftLeaderboardRows}
+            latestPublishedAt={latestPublishedSnapshot?.created_at ?? null}
+          />
         </article>
       </section>
     </main>

@@ -535,6 +535,14 @@ textarea {
   font-size: 30px;
 }
 
+.leaderboard-header {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: space-between;
+}
+
 @media (max-width: 800px) {
   .shell {
     padding: 20px;

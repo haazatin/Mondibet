@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { signOut } from "@/app/auth/actions";
 import { MatchBettingList, type ParticipantMatch } from "@/app/participant/bets/match-betting-list";
+import { PublishedLeaderboard } from "@/app/participant/leaderboard/published-leaderboard";
 import { ParticipantScoreSummary } from "@/app/participant/scores/participant-score-summary";
 import { getCurrentUserRole } from "@/lib/auth/roles";
 import { hasPublicSupabaseEnv } from "@/lib/supabase/env";
@@ -14,6 +15,19 @@ interface MyMatchScoreEvent {
   category: string;
   points: number;
   reason: string;
+}
+
+interface PublishedLeaderboardRow {
+  snapshot_id: string;
+  published_at: string;
+  row_id: string;
+  rank: number;
+  participant_name: string;
+  total_points: number;
+  group_stage_points: number;
+  knockout_points: number;
+  bonus_points: number;
+  streak_points: number;
 }
 
 export default async function ParticipantPage() {
@@ -100,6 +114,13 @@ export default async function ParticipantPage() {
       reason: event.reason,
       matches: matchesById.get(event.source_id) ?? null,
     }));
+  const { data: publishedRows } = current.tournamentId
+    ? await supabase.rpc("get_latest_published_leaderboard", {
+        p_tournament_id: current.tournamentId,
+      })
+    : { data: [] };
+  const normalizedPublishedRows = (publishedRows ?? []) as PublishedLeaderboardRow[];
+  const publishedAt = normalizedPublishedRows[0]?.published_at ?? null;
 
   return (
     <main className="shell">
@@ -141,7 +162,11 @@ export default async function ParticipantPage() {
         </article>
         <article className="panel">
           <h2>Leaderboard</h2>
-          <p>Participants see the latest admin-published leaderboard snapshot.</p>
+          <p>Latest admin-published standings snapshot.</p>
+          <PublishedLeaderboard
+            publishedAt={publishedAt}
+            rows={normalizedPublishedRows}
+          />
         </article>
       </section>
     </main>
