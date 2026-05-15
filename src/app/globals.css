@@ -554,6 +554,37 @@ textarea {
   justify-content: space-between;
 }
 
+.bonus-betting {
+  display: grid;
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.bonus-form {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+}
+
+.bonus-form h3 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.bonus-form-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.bonus-group-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .audit-log {
   margin-top: 18px;
 }
@@ -647,7 +678,9 @@ textarea {
   .bet-form:not(:has(.advancing-field)),
   .result-form,
   .result-form:not(:has(.advancing-field)),
-  .override-form {
+  .override-form,
+  .bonus-form-grid,
+  .bonus-group-grid {
     grid-template-columns: 1fr;
   }
 

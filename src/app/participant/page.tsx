@@ -1,5 +1,10 @@
 import { redirect } from "next/navigation";
 import { signOut } from "@/app/auth/actions";
+import {
+  BonusBettingPanel,
+  type BonusGroup,
+  type GeneralBonusBet,
+} from "@/app/participant/bonus/bonus-betting-panel";
 import { MatchBettingList, type ParticipantMatch } from "@/app/participant/bets/match-betting-list";
 import { PublishedLeaderboard } from "@/app/participant/leaderboard/published-leaderboard";
 import { ParticipantScoreSummary } from "@/app/participant/scores/participant-score-summary";
@@ -85,6 +90,46 @@ export default async function ParticipantPage() {
         )
         .eq("participant_id", effectiveParticipantId)
     : { data: [], error: null };
+  const { data: teams } = current.tournamentId
+    ? await supabase
+        .from("teams")
+        .select("id,name")
+        .eq("tournament_id", current.tournamentId)
+        .order("name", { ascending: true })
+    : { data: [] };
+  const { data: groups } = current.tournamentId
+    ? await supabase
+        .from("groups")
+        .select("id,name,sort_order")
+        .eq("tournament_id", current.tournamentId)
+        .order("sort_order", { ascending: true })
+    : { data: [] };
+  const { data: groupTeams } = await supabase
+    .from("group_teams")
+    .select("group_id,seed_order,teams(id,name)")
+    .order("seed_order", { ascending: true });
+  const { data: groupBonusBets } = effectiveParticipantId
+    ? await supabase
+        .from("group_bonus_bets")
+        .select(
+          "group_id,predicted_first_team_id,predicted_second_team_id,predicted_third_team_id,submitted_at",
+        )
+        .eq("participant_id", effectiveParticipantId)
+    : { data: [] };
+  const { data: generalBonusBet } = effectiveParticipantId
+    ? await supabase
+        .from("general_bonus_bets")
+        .select(
+          "champion_team_id,runner_up_team_id,top_scorer_name,top_scorer_goals,player_of_tournament,surprise_team_id,disappointment_team_id,highest_scoring_group_id,lowest_scoring_group_id,most_goals_team_id,fewest_goals_team_id,submitted_at",
+        )
+        .eq("participant_id", effectiveParticipantId)
+        .maybeSingle()
+    : { data: null };
+  const { data: bonusLockAt } = current.tournamentId
+    ? await supabase.rpc("get_bonus_lock_at", {
+        p_tournament_id: current.tournamentId,
+      })
+    : { data: null };
 
   const betsByMatchId = new Map((bets ?? []).map((bet) => [bet.match_id, bet]));
   const normalizedMatches: ParticipantMatch[] =
@@ -98,6 +143,34 @@ export default async function ParticipantPage() {
       home_team: Array.isArray(match.home_team) ? match.home_team[0] : match.home_team,
       away_team: Array.isArray(match.away_team) ? match.away_team[0] : match.away_team,
       bet: betsByMatchId.get(match.id) ?? null,
+    })) ?? [];
+  const groupBonusBetsByGroupId = new Map(
+    (groupBonusBets ?? []).map((bet) => [bet.group_id, bet]),
+  );
+  const groupTeamsByGroupId = new Map<string, BonusGroup["teams"]>();
+
+  for (const assignment of groupTeams ?? []) {
+    const team = Array.isArray(assignment.teams) ? assignment.teams[0] : assignment.teams;
+
+    if (!team) {
+      continue;
+    }
+
+    const currentTeams = groupTeamsByGroupId.get(assignment.group_id) ?? [];
+    currentTeams.push({
+      id: team.id,
+      name: team.name,
+    });
+    groupTeamsByGroupId.set(assignment.group_id, currentTeams);
+  }
+
+  const normalizedBonusGroups: BonusGroup[] =
+    groups?.map((group) => ({
+      id: group.id,
+      name: group.name,
+      sort_order: group.sort_order,
+      teams: groupTeamsByGroupId.get(group.id) ?? [],
+      bet: groupBonusBetsByGroupId.get(group.id) ?? null,
     })) ?? [];
   const { data: scoreEvents, error: scoreEventsError } = current.tournamentId
     ? await supabase.rpc("get_my_match_score_events", {
@@ -150,9 +223,15 @@ export default async function ParticipantPage() {
           ) : null}
           <MatchBettingList matches={normalizedMatches} />
         </article>
-        <article className="panel">
+        <article className="panel wide-panel">
           <h2>Bonus Bets</h2>
-          <p>Pre-tournament group and general bonus predictions will live here.</p>
+          <p>Submit pre-tournament group and general bonus predictions.</p>
+          <BonusBettingPanel
+            bonusLockAt={bonusLockAt}
+            generalBet={(generalBonusBet ?? null) as GeneralBonusBet | null}
+            groups={normalizedBonusGroups}
+            teams={teams ?? []}
+          />
         </article>
         <article className="panel wide-panel">
           <h2>Your Score</h2>
