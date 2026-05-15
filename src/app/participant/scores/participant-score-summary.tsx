@@ -1,6 +1,7 @@
 interface ParticipantScoreSummaryProps {
   events: {
     id: string;
+    source_type?: string;
     category: string;
     points: number;
     reason: string;
@@ -28,7 +29,7 @@ export function ParticipantScoreSummary({ events }: ParticipantScoreSummaryProps
           <table className="data-table">
             <thead>
               <tr>
-                <th>Match</th>
+                <th>Source</th>
                 <th>Category</th>
                 <th>Points</th>
                 <th>Reason</th>
@@ -37,8 +38,8 @@ export function ParticipantScoreSummary({ events }: ParticipantScoreSummaryProps
             <tbody>
               {events.map((event) => (
                 <tr key={event.id}>
-                  <td>{formatMatch(event.matches)}</td>
-                  <td>{event.category.replaceAll("_", " ")}</td>
+                  <td>{formatSource(event)}</td>
+                  <td>{formatCategory(event.category)}</td>
                   <td>{event.points}</td>
                   <td>{event.reason}</td>
                 </tr>
@@ -51,12 +52,20 @@ export function ParticipantScoreSummary({ events }: ParticipantScoreSummaryProps
   );
 }
 
-function formatMatch(match: ParticipantScoreSummaryProps["events"][number]["matches"]): string {
-  if (!match) {
+function formatSource(event: ParticipantScoreSummaryProps["events"][number]): string {
+  if (event.source_type && event.source_type !== "match") {
+    return formatCategory(event.source_type);
+  }
+
+  if (!event.matches) {
     return "Match";
   }
 
-  return `${match.sort_order} · ${match.home_team?.name ?? "TBD"} vs ${
-    match.away_team?.name ?? "TBD"
+  return `${event.matches.sort_order} · ${event.matches.home_team?.name ?? "TBD"} vs ${
+    event.matches.away_team?.name ?? "TBD"
   }`;
+}
+
+function formatCategory(category: string): string {
+  return category.replaceAll("_", " ");
 }

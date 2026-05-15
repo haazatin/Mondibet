@@ -1,5 +1,10 @@
 import { redirect } from "next/navigation";
 import { AuditLog } from "@/app/admin/audit/audit-log";
+import {
+  BonusResultPanel,
+  type BonusResultGroup,
+  type GeneralBonusResult,
+} from "@/app/admin/bonus-results/bonus-result-panel";
 import { signOut } from "@/app/auth/actions";
 import { LeaderboardPublishPanel } from "@/app/admin/leaderboard/leaderboard-publish-panel";
 import { MatchForm } from "@/app/admin/matches/match-form";
@@ -65,7 +70,7 @@ export default async function AdminPage() {
     : { data: [] };
   const { data: groupTeams } = await supabase
     .from("group_teams")
-    .select("id,seed_order,groups(name),teams(name)")
+    .select("id,group_id,team_id,seed_order,groups(id,name),teams(id,name)")
     .order("seed_order", { ascending: true });
   const { data: matches } = current.tournamentId
     ? await supabase
@@ -80,6 +85,8 @@ export default async function AdminPage() {
   const normalizedGroupTeams =
     groupTeams?.map((assignment) => ({
       id: assignment.id,
+      group_id: assignment.group_id,
+      team_id: assignment.team_id,
       seed_order: assignment.seed_order,
       groups: Array.isArray(assignment.groups) ? assignment.groups[0] : assignment.groups,
       teams: Array.isArray(assignment.teams) ? assignment.teams[0] : assignment.teams,
@@ -101,16 +108,31 @@ export default async function AdminPage() {
     ? await supabase
         .from("score_events")
         .select(
-          "id,participant_id,source_id,category,points,reason,calculated_at,participants(display_name)",
+          "id,participant_id,source_id,source_type,category,points,reason,calculated_at,participants(display_name)",
         )
         .eq("tournament_id", current.tournamentId)
-        .eq("source_type", "match")
         .order("calculated_at", { ascending: false })
     : { data: [] };
+  const { data: groupBonusResults } = current.tournamentId
+    ? await supabase
+        .from("group_bonus_results")
+        .select("group_id,first_team_id,second_team_id,third_team_id,groups!inner(tournament_id)")
+        .eq("groups.tournament_id", current.tournamentId)
+    : { data: [] };
+  const { data: generalBonusResult } = current.tournamentId
+    ? await supabase
+        .from("general_bonus_results")
+        .select(
+          "champion_team_id,runner_up_team_id,top_scorer_name,top_scorer_goals,player_of_tournament,highest_scoring_group_id,lowest_scoring_group_id,most_goals_team_id,fewest_goals_team_id",
+        )
+        .eq("tournament_id", current.tournamentId)
+        .maybeSingle()
+    : { data: null };
   const matchesById = new Map(normalizedMatches.map((match) => [match.id, match]));
   const normalizedScoreEvents =
     scoreEvents?.map((event) => ({
       id: event.id,
+      source_type: event.source_type,
       category: event.category,
       points: event.points,
       reason: event.reason,
@@ -118,6 +140,42 @@ export default async function AdminPage() {
       participants: Array.isArray(event.participants) ? event.participants[0] : event.participants,
       matches: matchesById.get(event.source_id) ?? null,
     })) ?? [];
+  const groupBonusResultsByGroupId = new Map(
+    (groupBonusResults ?? []).map((result) => [result.group_id, result]),
+  );
+  const groupTeamsByGroupId = new Map<string, BonusResultGroup["teams"]>();
+
+  for (const assignment of normalizedGroupTeams) {
+    if (!assignment.group_id || !assignment.teams) {
+      continue;
+    }
+
+    const currentTeams = groupTeamsByGroupId.get(assignment.group_id) ?? [];
+    currentTeams.push({
+      id: assignment.team_id,
+      name: assignment.teams.name,
+    });
+    groupTeamsByGroupId.set(assignment.group_id, currentTeams);
+  }
+
+  const normalizedBonusResultGroups: BonusResultGroup[] =
+    groups?.map((group) => {
+      const result = groupBonusResultsByGroupId.get(group.id);
+
+      return {
+        id: group.id,
+        name: group.name,
+        sort_order: group.sort_order,
+        teams: groupTeamsByGroupId.get(group.id) ?? [],
+        result: result
+          ? {
+              first_team_id: result.first_team_id,
+              second_team_id: result.second_team_id,
+              third_team_id: result.third_team_id,
+            }
+          : null,
+      };
+    }) ?? [];
   const draftLeaderboardRows = buildDraftLeaderboard({
     participants:
       participants?.map((participant) => ({
@@ -189,6 +247,15 @@ export default async function AdminPage() {
           <h2>Results</h2>
           <p>Enter official results. Saving recalculates score events for submitted bets.</p>
           <ResultEntryList matches={resultEntryMatches} />
+        </article>
+        <article className="panel wide-panel">
+          <h2>Bonus Results</h2>
+          <p>Enter official bonus outcomes. Saving recalculates bonus score events.</p>
+          <BonusResultPanel
+            generalResult={(generalBonusResult ?? null) as GeneralBonusResult | null}
+            groups={normalizedBonusResultGroups}
+            teams={teams ?? []}
+          />
         </article>
         <article className="panel wide-panel">
           <h2>Bet Overrides</h2>

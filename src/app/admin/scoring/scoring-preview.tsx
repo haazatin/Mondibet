@@ -1,6 +1,7 @@
 interface ScoringPreviewProps {
   events: {
     id: string;
+    source_type: string;
     category: string;
     points: number;
     reason: string;
@@ -32,7 +33,7 @@ export function ScoringPreview({ events }: ScoringPreviewProps) {
           <thead>
             <tr>
               <th>Participant</th>
-              <th>Match</th>
+              <th>Source</th>
               <th>Category</th>
               <th>Points</th>
               <th>Reason</th>
@@ -42,7 +43,7 @@ export function ScoringPreview({ events }: ScoringPreviewProps) {
             {events.map((event) => (
               <tr key={event.id}>
                 <td>{event.participants?.display_name ?? "Participant"}</td>
-                <td>{formatMatch(event.matches)}</td>
+                <td>{formatSource(event)}</td>
                 <td>{formatCategory(event.category)}</td>
                 <td>{event.points}</td>
                 <td>{event.reason}</td>
@@ -55,7 +56,13 @@ export function ScoringPreview({ events }: ScoringPreviewProps) {
   );
 }
 
-function formatMatch(match: ScoringPreviewProps["events"][number]["matches"]): string {
+function formatSource(event: ScoringPreviewProps["events"][number]): string {
+  if (event.source_type !== "match") {
+    return formatCategory(event.source_type);
+  }
+
+  const match = event.matches;
+
   if (!match) {
     return "Match";
   }

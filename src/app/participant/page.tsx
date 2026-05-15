@@ -17,6 +17,7 @@ export const dynamic = "force-dynamic";
 interface MyMatchScoreEvent {
   event_id: string;
   source_id: string;
+  source_type?: string;
   category: string;
   points: number;
   reason: string;
@@ -182,6 +183,7 @@ export default async function ParticipantPage() {
   const normalizedScoreEvents =
     myScoreEvents.map((event) => ({
       id: event.event_id,
+      source_type: event.source_type,
       category: event.category,
       points: event.points,
       reason: event.reason,
