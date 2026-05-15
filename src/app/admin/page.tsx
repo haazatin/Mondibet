@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { AuditLog } from "@/app/admin/audit/audit-log";
 import { signOut } from "@/app/auth/actions";
 import { LeaderboardPublishPanel } from "@/app/admin/leaderboard/leaderboard-publish-panel";
 import { MatchForm } from "@/app/admin/matches/match-form";
@@ -140,6 +141,16 @@ export default async function AdminPage() {
         .limit(1)
         .maybeSingle()
     : { data: null };
+  const { data: auditEvents } = current.tournamentId
+    ? await supabase
+        .from("admin_audit_log")
+        .select(
+          "id,action,entity_type,entity_id,reason,before_json,after_json,created_at,actor_user_id",
+        )
+        .eq("tournament_id", current.tournamentId)
+        .order("created_at", { ascending: false })
+        .limit(25)
+    : { data: [] };
 
   return (
     <main className="shell">
@@ -186,6 +197,11 @@ export default async function AdminPage() {
             participants={participants ?? []}
             matches={normalizedMatches}
           />
+        </article>
+        <article className="panel wide-panel">
+          <h2>Audit Log</h2>
+          <p>Recent admin override and correction history.</p>
+          <AuditLog events={auditEvents ?? []} />
         </article>
         <article className="panel wide-panel">
           <h2>Scoring Preview</h2>
