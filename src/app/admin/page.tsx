@@ -3,6 +3,7 @@ import { signOut } from "@/app/auth/actions";
 import { LeaderboardPublishPanel } from "@/app/admin/leaderboard/leaderboard-publish-panel";
 import { MatchForm } from "@/app/admin/matches/match-form";
 import { MatchList } from "@/app/admin/matches/match-list";
+import { MatchBetOverrideForm } from "@/app/admin/overrides/match-bet-override-form";
 import { ParticipantForm } from "@/app/admin/participants/participant-form";
 import { ParticipantList } from "@/app/admin/participants/participant-list";
 import { ResultEntryList, type ResultEntryMatch } from "@/app/admin/results/result-entry-list";
@@ -177,6 +178,14 @@ export default async function AdminPage() {
           <h2>Results</h2>
           <p>Enter official results. Saving recalculates score events for submitted bets.</p>
           <ResultEntryList matches={resultEntryMatches} />
+        </article>
+        <article className="panel wide-panel">
+          <h2>Bet Overrides</h2>
+          <p>Enter or correct participant match bets after lock with a required audit reason.</p>
+          <MatchBetOverrideForm
+            participants={participants ?? []}
+            matches={normalizedMatches}
+          />
         </article>
         <article className="panel wide-panel">
           <h2>Scoring Preview</h2>

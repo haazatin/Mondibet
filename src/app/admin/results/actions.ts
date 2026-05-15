@@ -118,7 +118,7 @@ export async function saveResult(
   return { status: "success", message: `Result saved. ${scoringResult.message}` };
 }
 
-async function recalculateMatchScores({
+export async function recalculateMatchScores({
   match,
   result,
 }: {

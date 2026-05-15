@@ -494,6 +494,17 @@ textarea {
   grid-template-columns: minmax(92px, 1fr) minmax(92px, 1fr) auto;
 }
 
+.override-form {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 18px;
+}
+
+.override-reason-field {
+  grid-column: span 3;
+}
+
 .bet-submit-button,
 .result-submit-button {
   min-width: 116px;
@@ -590,8 +601,13 @@ textarea {
   .bet-form,
   .bet-form:not(:has(.advancing-field)),
   .result-form,
-  .result-form:not(:has(.advancing-field)) {
+  .result-form:not(:has(.advancing-field)),
+  .override-form {
     grid-template-columns: 1fr;
+  }
+
+  .override-reason-field {
+    grid-column: auto;
   }
 
   .bet-submit-button,
