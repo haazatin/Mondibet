@@ -1,3 +1,5 @@
+import { setParticipantStatus } from "@/app/admin/participants/actions";
+
 interface ParticipantListProps {
   participants: {
     id: string;
@@ -20,6 +22,7 @@ export function ParticipantList({ participants }: ParticipantListProps) {
             <th>Name</th>
             <th>Email</th>
             <th>Status</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
@@ -28,6 +31,19 @@ export function ParticipantList({ participants }: ParticipantListProps) {
               <td>{participant.display_name}</td>
               <td>{participant.email}</td>
               <td>{participant.status}</td>
+              <td>
+                <form action={setParticipantStatus}>
+                  <input name="participantId" type="hidden" value={participant.id} />
+                  <input
+                    name="status"
+                    type="hidden"
+                    value={participant.status === "active" ? "inactive" : "active"}
+                  />
+                  <button className="secondary-button" type="submit">
+                    {participant.status === "active" ? "Deactivate" : "Activate"}
+                  </button>
+                </form>
+              </td>
             </tr>
           ))}
         </tbody>
@@ -35,4 +51,3 @@ export function ParticipantList({ participants }: ParticipantListProps) {
     </div>
   );
 }
-

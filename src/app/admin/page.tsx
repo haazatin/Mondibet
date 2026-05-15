@@ -9,6 +9,7 @@ import { signOut } from "@/app/auth/actions";
 import { LeaderboardPublishPanel } from "@/app/admin/leaderboard/leaderboard-publish-panel";
 import { MatchForm } from "@/app/admin/matches/match-form";
 import { MatchList } from "@/app/admin/matches/match-list";
+import { BonusBetOverrideForm } from "@/app/admin/overrides/bonus-bet-override-form";
 import { MatchBetOverrideForm } from "@/app/admin/overrides/match-bet-override-form";
 import { ParticipantForm } from "@/app/admin/participants/participant-form";
 import { ParticipantList } from "@/app/admin/participants/participant-list";
@@ -263,6 +264,12 @@ export default async function AdminPage() {
           <MatchBetOverrideForm
             participants={participants ?? []}
             matches={normalizedMatches}
+          />
+          <BonusBetOverrideForm
+            groupTeams={normalizedGroupTeams}
+            groups={groups ?? []}
+            participants={participants ?? []}
+            teams={teams ?? []}
           />
         </article>
         <article className="panel wide-panel">

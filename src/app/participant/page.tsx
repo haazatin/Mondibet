@@ -6,6 +6,7 @@ import {
   type GeneralBonusBet,
 } from "@/app/participant/bonus/bonus-betting-panel";
 import { MatchBettingList, type ParticipantMatch } from "@/app/participant/bets/match-betting-list";
+import { VisibleMatchBets } from "@/app/participant/bets/visible-match-bets";
 import { PublishedLeaderboard } from "@/app/participant/leaderboard/published-leaderboard";
 import { ParticipantScoreSummary } from "@/app/participant/scores/participant-score-summary";
 import { getCurrentUserRole } from "@/lib/auth/roles";
@@ -131,6 +132,11 @@ export default async function ParticipantPage() {
         p_tournament_id: current.tournamentId,
       })
     : { data: null };
+  const { data: visibleMatchBets } = current.tournamentId
+    ? await supabase.rpc("get_visible_match_bets", {
+        p_tournament_id: current.tournamentId,
+      })
+    : { data: [] };
 
   const betsByMatchId = new Map((bets ?? []).map((bet) => [bet.match_id, bet]));
   const normalizedMatches: ParticipantMatch[] =
@@ -234,6 +240,11 @@ export default async function ParticipantPage() {
             groups={normalizedBonusGroups}
             teams={teams ?? []}
           />
+        </article>
+        <article className="panel wide-panel">
+          <h2>Visible Bets</h2>
+          <p>Participant match bets after the relevant match day is locked.</p>
+          <VisibleMatchBets bets={visibleMatchBets ?? []} matches={normalizedMatches} />
         </article>
         <article className="panel wide-panel">
           <h2>Your Score</h2>

@@ -161,7 +161,7 @@ export async function saveGeneralBonusResult(
   return { status: "success", message: `General bonus result saved. ${scoringResult.message}` };
 }
 
-async function recalculateGroupBonusScores({
+export async function recalculateGroupBonusScores({
   groupId,
   resultId,
   tournamentId,
@@ -252,7 +252,7 @@ async function recalculateGroupBonusScores({
   return { status: "success", message: `${scoreEvents.length} score events recalculated.` };
 }
 
-async function recalculateGeneralBonusScores(result: {
+export async function recalculateGeneralBonusScores(result: {
   id: string;
   tournament_id: string;
   champion_team_id: string | null;

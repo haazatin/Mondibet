@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getCurrentUserRole } from "@/lib/auth/roles";
 import { scoreMatchBet } from "@/lib/scoring/match";
+import { scoreStreakBonuses } from "@/lib/scoring/streaks";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { MatchBet, MatchResult, TournamentStage } from "@/types/tournament";
 
@@ -112,10 +113,19 @@ export async function saveResult(
     return scoringResult;
   }
 
+  const streakResult = await recalculateTournamentStreakScores(match.tournament_id);
+
+  if (streakResult.status === "error") {
+    return streakResult;
+  }
+
   revalidatePath("/admin");
   revalidatePath("/participant");
 
-  return { status: "success", message: `Result saved. ${scoringResult.message}` };
+  return {
+    status: "success",
+    message: `Result saved. ${scoringResult.message} ${streakResult.message}`,
+  };
 }
 
 export async function recalculateMatchScores({
@@ -209,6 +219,138 @@ export async function recalculateMatchScores({
   }
 
   return { status: "success", message: `${scoreEvents.length} score events recalculated.` };
+}
+
+export async function recalculateTournamentStreakScores(
+  tournamentId: string,
+): Promise<ResultActionState> {
+  const supabase = await createSupabaseServerClient();
+
+  const { data: participants, error: participantsError } = await supabase
+    .from("participants")
+    .select("id")
+    .eq("tournament_id", tournamentId)
+    .eq("status", "active");
+
+  if (participantsError) {
+    return { status: "error", message: participantsError.message };
+  }
+
+  const { data: matches, error: matchesError } = await supabase
+    .from("matches")
+    .select(
+      "id,stage,home_team_id,away_team_id,starts_at,sort_order,results(home_score_90,away_score_90,advancing_team_id)",
+    )
+    .eq("tournament_id", tournamentId)
+    .order("starts_at", { ascending: true })
+    .order("sort_order", { ascending: true });
+
+  if (matchesError) {
+    return { status: "error", message: matchesError.message };
+  }
+
+  const resultedMatches =
+    matches
+      ?.map((match) => ({
+        id: match.id,
+        stage: match.stage as TournamentStage,
+        homeTeamId: match.home_team_id,
+        awayTeamId: match.away_team_id,
+        result: Array.isArray(match.results) ? (match.results[0] ?? null) : (match.results ?? null),
+      }))
+      .filter((match) => match.result) ?? [];
+
+  const { error: deleteError } = await supabase
+    .from("score_events")
+    .delete()
+    .eq("tournament_id", tournamentId)
+    .eq("source_type", "streak");
+
+  if (deleteError) {
+    return { status: "error", message: deleteError.message };
+  }
+
+  if (resultedMatches.length === 0 || !participants?.length) {
+    return { status: "success", message: "No streak events were created." };
+  }
+
+  const { data: bets, error: betsError } = await supabase
+    .from("match_bets")
+    .select(
+      "match_id,participant_id,predicted_home_score_90,predicted_away_score_90,predicted_advancing_team_id",
+    )
+    .in(
+      "match_id",
+      resultedMatches.map((match) => match.id),
+    );
+
+  if (betsError) {
+    return { status: "error", message: betsError.message };
+  }
+
+  const betsByParticipantAndMatch = new Map<string, (typeof bets)[number]>();
+
+  for (const bet of bets ?? []) {
+    betsByParticipantAndMatch.set(`${bet.participant_id}:${bet.match_id}`, bet);
+  }
+
+  const scoreEvents = participants.flatMap((participant) => {
+    const correctOutcomes = resultedMatches.map((match) => {
+      const bet = betsByParticipantAndMatch.get(`${participant.id}:${match.id}`);
+
+      if (!bet || !match.result) {
+        return false;
+      }
+
+      const breakdown = scoreMatchBet(
+        {
+          stage: match.stage,
+          homeTeamId: match.homeTeamId,
+          awayTeamId: match.awayTeamId,
+        },
+        {
+          predictedHomeScore90: bet.predicted_home_score_90,
+          predictedAwayScore90: bet.predicted_away_score_90,
+          predictedAdvancingTeamId: bet.predicted_advancing_team_id ?? undefined,
+        },
+        {
+          homeScore90: match.result.home_score_90,
+          awayScore90: match.result.away_score_90,
+          advancingTeamId: match.result.advancing_team_id ?? undefined,
+        },
+      );
+
+      return breakdown.outcomePoints > 0;
+    });
+
+    const streak = scoreStreakBonuses(correctOutcomes);
+
+    if (streak.total === 0) {
+      return [];
+    }
+
+    return [
+      {
+        participant_id: participant.id,
+        tournament_id: tournamentId,
+        source_type: "streak",
+        source_id: participant.id,
+        category: "streak",
+        points: streak.total,
+        reason: `Streak bonus: ${streak.streaksOfFive} five-match and ${streak.streaksOfThree} three-match streaks`,
+      },
+    ];
+  });
+
+  if (scoreEvents.length > 0) {
+    const { error: insertError } = await supabase.from("score_events").insert(scoreEvents);
+
+    if (insertError) {
+      return { status: "error", message: insertError.message };
+    }
+  }
+
+  return { status: "success", message: `${scoreEvents.length} streak events recalculated.` };
 }
 
 function parseScore(value: FormDataEntryValue | null): number | null {

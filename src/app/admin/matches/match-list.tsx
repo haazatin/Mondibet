@@ -1,3 +1,5 @@
+import { deleteDraftMatch } from "@/app/admin/matches/actions";
+
 interface MatchListProps {
   matches: {
     id: string;
@@ -31,6 +33,7 @@ export function MatchList({ matches }: MatchListProps) {
             <th>Kickoff</th>
             <th>Daily lock</th>
             <th>Result</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
@@ -47,6 +50,16 @@ export function MatchList({ matches }: MatchListProps) {
                 {match.result
                   ? `${match.result.home_score_90}-${match.result.away_score_90}`
                   : "Pending"}
+              </td>
+              <td>
+                {match.result ? null : (
+                  <form action={deleteDraftMatch}>
+                    <input name="matchId" type="hidden" value={match.id} />
+                    <button className="secondary-button" type="submit">
+                      Delete
+                    </button>
+                  </form>
+                )}
               </td>
             </tr>
           ))}

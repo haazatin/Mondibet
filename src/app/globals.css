@@ -501,6 +501,12 @@ textarea {
   margin-top: 18px;
 }
 
+.override-form-title {
+  font-size: 16px;
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
 .override-reason-field {
   grid-column: span 3;
 }

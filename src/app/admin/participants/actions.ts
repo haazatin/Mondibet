@@ -57,3 +57,27 @@ export async function addParticipant(
   };
 }
 
+export async function setParticipantStatus(formData: FormData): Promise<void> {
+  const participantId = String(formData.get("participantId") ?? "");
+  const status = String(formData.get("status") ?? "");
+
+  if (!participantId || !["active", "inactive"].includes(status)) {
+    return;
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const current = await getCurrentUserRole(supabase);
+
+  if (!current || current.role !== "admin" || !current.tournamentId) {
+    return;
+  }
+
+  await supabase
+    .from("participants")
+    .update({ status })
+    .eq("id", participantId)
+    .eq("tournament_id", current.tournamentId);
+
+  revalidatePath("/admin");
+  revalidatePath("/participant");
+}

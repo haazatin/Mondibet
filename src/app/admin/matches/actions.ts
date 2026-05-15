@@ -107,7 +107,43 @@ export async function addMatch(
   return { status: "success", message: "Match added." };
 }
 
+export async function deleteDraftMatch(formData: FormData): Promise<void> {
+  const matchId = String(formData.get("matchId") ?? "");
+
+  if (!matchId) {
+    return;
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const current = await getCurrentUserRole(supabase);
+
+  if (!current || current.role !== "admin" || !current.tournamentId) {
+    return;
+  }
+
+  const { count: betCount } = await supabase
+    .from("match_bets")
+    .select("id", { count: "exact", head: true })
+    .eq("match_id", matchId);
+  const { count: resultCount } = await supabase
+    .from("results")
+    .select("id", { count: "exact", head: true })
+    .eq("match_id", matchId);
+
+  if ((betCount ?? 0) > 0 || (resultCount ?? 0) > 0) {
+    return;
+  }
+
+  await supabase
+    .from("matches")
+    .delete()
+    .eq("id", matchId)
+    .eq("tournament_id", current.tournamentId);
+
+  revalidatePath("/admin");
+  revalidatePath("/participant");
+}
+
 function emptyToNull(value: string): string | null {
   return value.trim() ? value : null;
 }
-
