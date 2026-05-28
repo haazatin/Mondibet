@@ -120,6 +120,7 @@ function GeneralBonusForm({
   return (
     <form action={formAction} className={isSubmitted ? "bonus-form locked-form" : "bonus-form"}>
       <h3>General Bonus</h3>
+      {bet ? <GeneralBonusSummary bet={bet} groups={groups} teams={teams} /> : null}
       <div className="bonus-form-grid">
         <TeamSelect
           defaultValue={bet?.champion_team_id}
@@ -234,6 +235,7 @@ function GroupBonusForm({ disabled, group }: { disabled: boolean; group: BonusGr
     <form action={formAction} className={isSubmitted ? "bonus-form locked-form" : "bonus-form"}>
       <input name="groupId" type="hidden" value={group.id} />
       <h3>{group.name}</h3>
+      {group.bet ? <GroupBonusSummary group={group} /> : null}
       <TeamSelect
         defaultValue={group.bet?.predicted_first_team_id}
         disabled={isDisabled}
@@ -274,6 +276,70 @@ function GroupBonusForm({ disabled, group }: { disabled: boolean; group: BonusGr
         ) : null}
       </div>
     </form>
+  );
+}
+
+function GeneralBonusSummary({
+  bet,
+  groups,
+  teams,
+}: {
+  bet: GeneralBonusBet;
+  groups: BonusGroup[];
+  teams: BonusTeam[];
+}) {
+  const rows = [
+    ["Champion", findTeamName(teams, bet.champion_team_id)],
+    ["Runner-up", findTeamName(teams, bet.runner_up_team_id)],
+    ["Top scorer", bet.top_scorer_name],
+    ["Top scorer goals", bet.top_scorer_goals === null ? null : String(bet.top_scorer_goals)],
+    ["Player of tournament", bet.player_of_tournament],
+    ["Highest-scoring group", findGroupName(groups, bet.highest_scoring_group_id)],
+    ["Lowest-scoring group", findGroupName(groups, bet.lowest_scoring_group_id)],
+    ["Team with most goals", findTeamName(teams, bet.most_goals_team_id)],
+    ["Team with fewest goals", findTeamName(teams, bet.fewest_goals_team_id)],
+    ["Surprise team", findTeamName(teams, bet.surprise_team_id)],
+    ["Disappointment team", findTeamName(teams, bet.disappointment_team_id)],
+  ];
+
+  return <SubmittedBonusSummary rows={rows} />;
+}
+
+function GroupBonusSummary({ group }: { group: BonusGroup }) {
+  if (!group.bet) {
+    return null;
+  }
+
+  return (
+    <SubmittedBonusSummary
+      rows={[
+        ["First place", findTeamName(group.teams, group.bet.predicted_first_team_id)],
+        ["Second place", findTeamName(group.teams, group.bet.predicted_second_team_id)],
+        ["Third place", findTeamName(group.teams, group.bet.predicted_third_team_id)],
+      ]}
+    />
+  );
+}
+
+function SubmittedBonusSummary({ rows }: { rows: (string | null)[][] }) {
+  const visibleRows = rows.filter(([, value]) => value);
+
+  if (visibleRows.length === 0) {
+    return <p className="empty-state">Submitted with no selected values.</p>;
+  }
+
+  return (
+    <div className="submitted-bonus-summary">
+      <div className="match-meta">Submitted bet</div>
+      <dl>
+        {visibleRows.map(([label, value]) => (
+          <div key={label ?? value ?? ""}>
+            <dt>{label}</dt>
+            <dd>{value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
   );
 }
 
@@ -333,6 +399,22 @@ function GroupSelect({
       </select>
     </label>
   );
+}
+
+function findTeamName(teams: BonusTeam[], teamId: string | null): string | null {
+  if (!teamId) {
+    return null;
+  }
+
+  return teams.find((team) => team.id === teamId)?.name ?? "Team";
+}
+
+function findGroupName(groups: BonusGroup[], groupId: string | null): string | null {
+  if (!groupId) {
+    return null;
+  }
+
+  return groups.find((group) => group.id === groupId)?.name ?? "Group";
 }
 
 function formatDate(value: string): string {
