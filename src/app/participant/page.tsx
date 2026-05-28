@@ -240,7 +240,7 @@ export default async function ParticipantPage() {
           />
         </article>
         <article className="panel wide-panel">
-          <h2>Visible Bets</h2>
+          <h2>Your Next Bets</h2>
           <p>Your submitted match bets until the admin enters results.</p>
           <VisibleMatchBets matches={pendingSubmittedMatches} />
         </article>
