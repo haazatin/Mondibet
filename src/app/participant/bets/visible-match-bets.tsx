@@ -1,7 +1,4 @@
 interface VisibleMatchBet {
-  match_id: string;
-  participant_id: string;
-  participant_name: string;
   predicted_home_score_90: number;
   predicted_away_score_90: number;
   predicted_advancing_team_id: string | null;
@@ -14,80 +11,70 @@ interface VisibleMatchBetsProps {
     sort_order: number;
     home_team: { id: string; name: string } | null;
     away_team: { id: string; name: string } | null;
+    bet: VisibleMatchBet | null;
   }[];
-  bets: VisibleMatchBet[];
 }
 
-export function VisibleMatchBets({ matches, bets }: VisibleMatchBetsProps) {
-  if (bets.length === 0) {
-    return <p className="empty-state">Other bets will appear here after each match day locks.</p>;
-  }
-
-  const betsByMatch = new Map<string, VisibleMatchBet[]>();
-
-  for (const bet of bets) {
-    const current = betsByMatch.get(bet.match_id) ?? [];
-    current.push(bet);
-    betsByMatch.set(bet.match_id, current);
+export function VisibleMatchBets({ matches }: VisibleMatchBetsProps) {
+  if (matches.length === 0) {
+    return <p className="empty-state">Submitted match bets will appear here until results are entered.</p>;
   }
 
   return (
     <div className="result-entry-list">
-      {matches
-        .filter((match) => betsByMatch.has(match.id))
-        .map((match) => (
-          <article className="result-entry-card" key={match.id}>
-            <div className="match-bet-header">
-              <div>
-                <div className="match-meta">Match {match.sort_order}</div>
-                <h3>
-                  {match.home_team?.name ?? "TBD"} vs {match.away_team?.name ?? "TBD"}
-                </h3>
-              </div>
+      {matches.map((match) => (
+        <article className="result-entry-card" key={match.id}>
+          <div className="match-bet-header">
+            <div>
+              <div className="match-meta">Match {match.sort_order}</div>
+              <h3>
+                {match.home_team?.name ?? "TBD"} vs {match.away_team?.name ?? "TBD"}
+              </h3>
             </div>
-            <div className="table-wrap">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Participant</th>
-                    <th>Prediction</th>
-                    <th>Advancing</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(betsByMatch.get(match.id) ?? []).map((bet) => (
-                    <tr key={`${bet.match_id}-${bet.participant_id}`}>
-                      <td>{bet.participant_name}</td>
-                      <td>
-                        {bet.predicted_home_score_90}-{bet.predicted_away_score_90}
-                      </td>
-                      <td>{formatAdvancingTeam(match, bet.predicted_advancing_team_id)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          </div>
+          <dl className="match-times">
+            <div>
+              <dt>Your bet</dt>
+              <dd>{formatBet(match)}</dd>
             </div>
-          </article>
-        ))}
+            <div>
+              <dt>Submitted</dt>
+              <dd>{match.bet ? formatDate(match.bet.submitted_at) : "-"}</dd>
+            </div>
+          </dl>
+        </article>
+      ))}
     </div>
   );
 }
 
-function formatAdvancingTeam(
-  match: VisibleMatchBetsProps["matches"][number],
-  teamId: string | null,
-): string {
+function formatBet(match: VisibleMatchBetsProps["matches"][number]): string {
+  if (!match.bet) {
+    return "No bet";
+  }
+
+  const score = `${match.bet.predicted_home_score_90}-${match.bet.predicted_away_score_90}`;
+  const advancingTeam = formatAdvancingTeam(match, match.bet.predicted_advancing_team_id);
+
+  if (advancingTeam) {
+    return `${score}, ${advancingTeam} advances`;
+  }
+
+  return score;
+}
+
+function formatAdvancingTeam(match: VisibleMatchBetsProps["matches"][number], teamId: string | null): string {
   if (!teamId) {
-    return "-";
+    return "";
   }
 
-  if (teamId === match.home_team?.id) {
-    return match.home_team.name;
-  }
+  return [match.home_team, match.away_team].find((team) => team?.id === teamId)?.name ?? "Team";
+}
 
-  if (teamId === match.away_team?.id) {
-    return match.away_team.name;
-  }
-
-  return "Team";
+function formatDate(value: string): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    dateStyle: "short",
+    timeStyle: "short",
+    timeZone: "Asia/Jerusalem",
+  }).format(new Date(value));
 }

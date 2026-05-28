@@ -58,7 +58,7 @@ export function BonusBettingPanel({
   teams,
   generalBet,
 }: BonusBettingPanelProps) {
-  const [isHidden, setIsHidden] = useState(false);
+  const [isHidden, setIsHidden] = useState(true);
 
   if (groups.length === 0 && teams.length === 0) {
     return <p className="empty-state">Bonus betting will appear after teams and groups are set up.</p>;

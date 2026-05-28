@@ -126,11 +126,6 @@ export default async function ParticipantPage() {
         p_tournament_id: current.tournamentId,
       })
     : { data: null };
-  const { data: visibleMatchBets } = current.tournamentId
-    ? await supabase.rpc("get_visible_match_bets", {
-        p_tournament_id: current.tournamentId,
-      })
-    : { data: [] };
   const { data: completedMatchResults } = current.tournamentId
     ? await supabase.rpc("get_my_completed_match_results", {
         p_tournament_id: current.tournamentId,
@@ -185,6 +180,12 @@ export default async function ParticipantPage() {
     : { data: [] };
   const normalizedPublishedRows = (publishedRows ?? []) as PublishedLeaderboardRow[];
   const publishedAt = normalizedPublishedRows[0]?.published_at ?? null;
+  const completedMatchIds = new Set(
+    ((completedMatchResults ?? []) as CompletedMatchResult[]).map((result) => result.match_id),
+  );
+  const pendingSubmittedMatches = normalizedMatches.filter(
+    (match) => match.bet && !completedMatchIds.has(match.id),
+  );
 
   return (
     <main className="shell">
@@ -234,8 +235,8 @@ export default async function ParticipantPage() {
         </article>
         <article className="panel wide-panel">
           <h2>Visible Bets</h2>
-          <p>Participant match bets after the relevant match day is locked.</p>
-          <VisibleMatchBets bets={visibleMatchBets ?? []} matches={normalizedMatches} />
+          <p>Your submitted match bets until the admin enters results.</p>
+          <VisibleMatchBets matches={pendingSubmittedMatches} />
         </article>
         <article className="panel wide-panel">
           <h2>Completed Matches</h2>
