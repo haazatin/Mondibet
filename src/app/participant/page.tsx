@@ -40,6 +40,14 @@ interface MatchBetRow {
   submitted_at: string;
 }
 
+interface GroupBonusBetRow {
+  group_id: string;
+  predicted_first_team_id: string | null;
+  predicted_second_team_id: string | null;
+  predicted_third_team_id: string | null;
+  submitted_at: string;
+}
+
 export default async function ParticipantPage() {
   if (!hasPublicSupabaseEnv()) {
     redirect("/dashboard");
@@ -63,17 +71,6 @@ export default async function ParticipantPage() {
   if (current.role === "admin") {
     redirect("/admin");
   }
-
-  const { data: participantByEmail } =
-    current.tournamentId && current.user.email
-      ? await supabase
-          .from("participants")
-          .select("id")
-          .eq("tournament_id", current.tournamentId)
-          .eq("email", current.user.email.toLowerCase())
-          .maybeSingle()
-      : { data: null };
-  const effectiveParticipantId = current.participantId ?? participantByEmail?.id ?? null;
 
   const { data: matches, error: matchesError } =
     current.tournamentId
@@ -110,22 +107,15 @@ export default async function ParticipantPage() {
     .from("group_teams")
     .select("group_id,seed_order,teams(id,name)")
     .order("seed_order", { ascending: true });
-  const { data: groupBonusBets } = effectiveParticipantId
-    ? await supabase
-        .from("group_bonus_bets")
-        .select(
-          "group_id,predicted_first_team_id,predicted_second_team_id,predicted_third_team_id,submitted_at",
-        )
-        .eq("participant_id", effectiveParticipantId)
+  const { data: groupBonusBets } = current.tournamentId
+    ? await supabase.rpc("get_my_group_bonus_bets", {
+        p_tournament_id: current.tournamentId,
+      })
     : { data: [] };
-  const { data: generalBonusBet } = effectiveParticipantId
-    ? await supabase
-        .from("general_bonus_bets")
-        .select(
-          "champion_team_id,runner_up_team_id,top_scorer_name,top_scorer_goals,player_of_tournament,surprise_team_id,disappointment_team_id,highest_scoring_group_id,lowest_scoring_group_id,most_goals_team_id,fewest_goals_team_id,submitted_at",
-        )
-        .eq("participant_id", effectiveParticipantId)
-        .maybeSingle()
+  const { data: generalBonusBetRows } = current.tournamentId
+    ? await supabase.rpc("get_my_general_bonus_bet", {
+        p_tournament_id: current.tournamentId,
+      })
     : { data: null };
   const { data: bonusLockAt } = current.tournamentId
     ? await supabase.rpc("get_bonus_lock_at", {
@@ -157,8 +147,9 @@ export default async function ParticipantPage() {
       away_team: Array.isArray(match.away_team) ? match.away_team[0] : match.away_team,
       bet: betsByMatchId.get(match.id) ?? null,
     })) ?? [];
+  const normalizedGroupBonusBets = (groupBonusBets ?? []) as GroupBonusBetRow[];
   const groupBonusBetsByGroupId = new Map(
-    (groupBonusBets ?? []).map((bet) => [bet.group_id, bet]),
+    normalizedGroupBonusBets.map((bet) => [bet.group_id, bet]),
   );
   const groupTeamsByGroupId = new Map<string, BonusGroup["teams"]>();
 
@@ -192,6 +183,9 @@ export default async function ParticipantPage() {
     : { data: [] };
   const normalizedPublishedRows = (publishedRows ?? []) as PublishedLeaderboardRow[];
   const publishedAt = normalizedPublishedRows[0]?.published_at ?? null;
+  const generalBonusBet = Array.isArray(generalBonusBetRows)
+    ? (generalBonusBetRows[0] ?? null)
+    : null;
   const completedMatchIds = new Set(
     ((completedMatchResults ?? []) as CompletedMatchResult[]).map((result) => result.match_id),
   );
