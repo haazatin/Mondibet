@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { AuditLog } from "@/app/admin/audit/audit-log";
+import { ParticipantBonusBetsPanel } from "@/app/admin/bets/participant-bonus-bets-panel";
 import { ParticipantBetsPanel } from "@/app/admin/bets/participant-bets-panel";
 import {
   BonusResultPanel,
@@ -125,6 +126,24 @@ export default async function AdminPage() {
         .eq("participant.tournament_id", current.tournamentId)
         .order("submitted_at", { ascending: true })
     : { data: [] };
+  const { data: groupBonusBets } = current.tournamentId
+    ? await supabase
+        .from("group_bonus_bets")
+        .select(
+          "group_id,participant_id,predicted_first_team_id,predicted_second_team_id,predicted_third_team_id,submitted_at,participant:participants!inner(display_name,tournament_id)",
+        )
+        .eq("participant.tournament_id", current.tournamentId)
+        .order("submitted_at", { ascending: true })
+    : { data: [] };
+  const { data: generalBonusBets } = current.tournamentId
+    ? await supabase
+        .from("general_bonus_bets")
+        .select(
+          "participant_id,champion_team_id,runner_up_team_id,top_scorer_name,top_scorer_goals,player_of_tournament,surprise_team_id,disappointment_team_id,highest_scoring_group_id,lowest_scoring_group_id,most_goals_team_id,fewest_goals_team_id,submitted_at,participant:participants!inner(display_name,tournament_id)",
+        )
+        .eq("participant.tournament_id", current.tournamentId)
+        .order("submitted_at", { ascending: true })
+    : { data: [] };
   const { data: groupBonusResults } = current.tournamentId
     ? await supabase
         .from("group_bonus_results")
@@ -160,6 +179,33 @@ export default async function AdminPage() {
       predicted_home_score_90: bet.predicted_home_score_90,
       predicted_away_score_90: bet.predicted_away_score_90,
       predicted_advancing_team_id: bet.predicted_advancing_team_id,
+      submitted_at: bet.submitted_at,
+    })) ?? [];
+  const normalizedGroupBonusBets =
+    groupBonusBets?.map((bet) => ({
+      group_id: bet.group_id,
+      participant_id: bet.participant_id,
+      participant_name: getJoinedParticipantName(bet.participant),
+      predicted_first_team_id: bet.predicted_first_team_id,
+      predicted_second_team_id: bet.predicted_second_team_id,
+      predicted_third_team_id: bet.predicted_third_team_id,
+      submitted_at: bet.submitted_at,
+    })) ?? [];
+  const normalizedGeneralBonusBets =
+    generalBonusBets?.map((bet) => ({
+      participant_id: bet.participant_id,
+      participant_name: getJoinedParticipantName(bet.participant),
+      champion_team_id: bet.champion_team_id,
+      runner_up_team_id: bet.runner_up_team_id,
+      top_scorer_name: bet.top_scorer_name,
+      top_scorer_goals: bet.top_scorer_goals,
+      player_of_tournament: bet.player_of_tournament,
+      surprise_team_id: bet.surprise_team_id,
+      disappointment_team_id: bet.disappointment_team_id,
+      highest_scoring_group_id: bet.highest_scoring_group_id,
+      lowest_scoring_group_id: bet.lowest_scoring_group_id,
+      most_goals_team_id: bet.most_goals_team_id,
+      fewest_goals_team_id: bet.fewest_goals_team_id,
       submitted_at: bet.submitted_at,
     })) ?? [];
   const groupBonusResultsByGroupId = new Map(
@@ -315,6 +361,17 @@ export default async function AdminPage() {
           title="Scoring Preview"
         >
           <ScoringPreview events={normalizedScoreEvents} />
+        </CollapsibleAdminPanel>
+        <CollapsibleAdminPanel
+          description="Review participant pre-tournament bonus predictions."
+          title="Participant Bonus Bets"
+        >
+          <ParticipantBonusBetsPanel
+            generalBets={normalizedGeneralBonusBets}
+            groupBets={normalizedGroupBonusBets}
+            groups={groups ?? []}
+            teams={teams ?? []}
+          />
         </CollapsibleAdminPanel>
         <CollapsibleAdminPanel
           description="Enter official bonus outcomes. Saving recalculates bonus score events."
