@@ -120,9 +120,9 @@ export default async function AdminPage() {
     ? await supabase
         .from("match_bets")
         .select(
-          "match_id,participant_id,predicted_home_score_90,predicted_away_score_90,predicted_advancing_team_id,submitted_at,participants!inner(display_name,tournament_id)",
+          "match_id,participant_id,predicted_home_score_90,predicted_away_score_90,predicted_advancing_team_id,submitted_at,participant:participants!inner(display_name,tournament_id)",
         )
-        .eq("participants.tournament_id", current.tournamentId)
+        .eq("participant.tournament_id", current.tournamentId)
         .order("submitted_at", { ascending: true })
     : { data: [] };
   const { data: groupBonusResults } = current.tournamentId
@@ -156,7 +156,7 @@ export default async function AdminPage() {
     matchBets?.map((bet) => ({
       match_id: bet.match_id,
       participant_id: bet.participant_id,
-      participant_name: bet.participants[0]?.display_name ?? "Participant",
+      participant_name: getJoinedParticipantName(bet.participant),
       predicted_home_score_90: bet.predicted_home_score_90,
       predicted_away_score_90: bet.predicted_away_score_90,
       predicted_advancing_team_id: bet.predicted_advancing_team_id,
@@ -329,4 +329,11 @@ export default async function AdminPage() {
       </section>
     </main>
   );
+}
+
+function getJoinedParticipantName(
+  participant: { display_name?: string | null } | { display_name?: string | null }[] | null,
+): string {
+  const participantRow = Array.isArray(participant) ? participant[0] : participant;
+  return participantRow?.display_name || "Participant";
 }
