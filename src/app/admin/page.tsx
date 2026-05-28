@@ -260,12 +260,13 @@ export default async function AdminPage() {
         >
           <AuditLog events={auditEvents ?? []} />
         </CollapsibleAdminPanel>
-        <article className="panel wide-panel">
-          <h2>Participants</h2>
-          <p>Add participant names and emails before inviting them to sign in.</p>
+        <CollapsibleAdminPanel
+          description="Add participant names and emails before inviting them to sign in."
+          title="Participants"
+        >
           <ParticipantForm />
           <ParticipantList participants={participants ?? []} />
-        </article>
+        </CollapsibleAdminPanel>
         <CollapsibleAdminPanel
           description="Add teams, groups, and group assignments before creating matches."
           title="Tournament Setup"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { saveResult, type ResultActionState } from "./actions";
 
 export interface ResultEntryMatch {
@@ -31,15 +31,41 @@ const initialState: ResultActionState = {
 const knockoutStages = new Set(["round_of_32", "round_of_16", "quarterfinal", "semifinal", "final"]);
 
 export function ResultEntryList({ matches }: ResultEntryListProps) {
+  const [showSavedResults, setShowSavedResults] = useState(false);
+
   if (matches.length === 0) {
     return <p className="empty-state">Create matches before entering results.</p>;
   }
 
+  const visibleMatches = showSavedResults ? matches : matches.filter((match) => !match.result);
+  const savedResultsCount = matches.length - visibleMatches.length;
+
   return (
-    <div className="result-entry-list">
-      {matches.map((match) => (
-        <ResultEntryCard key={match.id} match={match} />
-      ))}
+    <div className="match-list-section">
+      <div className="section-actions">
+        <span>
+          Showing {visibleMatches.length} matches
+          {savedResultsCount > 0 ? `, ${savedResultsCount} saved hidden` : ""}
+        </span>
+        {matches.some((match) => match.result) ? (
+          <button
+            className="secondary-button"
+            onClick={() => setShowSavedResults((current) => !current)}
+            type="button"
+          >
+            {showSavedResults ? "Hide saved results" : "Unhide saved results"}
+          </button>
+        ) : null}
+      </div>
+      {visibleMatches.length === 0 ? (
+        <p className="empty-state">All match results are saved.</p>
+      ) : (
+        <div className="result-entry-list">
+          {visibleMatches.map((match) => (
+            <ResultEntryCard key={match.id} match={match} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
