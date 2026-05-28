@@ -213,7 +213,7 @@ function GeneralBonusForm({
         ) : (
           <span>No general bonus yet</span>
         )}
-        <button className="primary-button" disabled={isDisabled} type="submit">
+        <button className="primary-button bonus-submit-button" disabled={isDisabled} type="submit">
           {pending ? "Saving..." : isSubmitted ? "General bonus submitted" : "Save general bonus"}
         </button>
         {state.message ? (
@@ -266,7 +266,7 @@ function GroupBonusForm({ disabled, group }: { disabled: boolean; group: BonusGr
         ) : (
           <span>No group bonus yet</span>
         )}
-        <button className="primary-button" disabled={isDisabled} type="submit">
+        <button className="primary-button bonus-submit-button" disabled={isDisabled} type="submit">
           {pending ? "Saving..." : isSubmitted ? "Group submitted" : "Save group"}
         </button>
         {state.message ? (
