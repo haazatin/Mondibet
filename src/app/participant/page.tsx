@@ -12,21 +12,11 @@ import {
   CompletedMatchResults,
   type CompletedMatchResult,
 } from "@/app/participant/results/completed-match-results";
-import { ParticipantScoreSummary } from "@/app/participant/scores/participant-score-summary";
 import { getCurrentUserRole } from "@/lib/auth/roles";
 import { hasPublicSupabaseEnv } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
-
-interface MyMatchScoreEvent {
-  event_id: string;
-  source_id: string;
-  source_type?: string;
-  category: string;
-  points: number;
-  reason: string;
-}
 
 interface PublishedLeaderboardRow {
   snapshot_id: string;
@@ -188,22 +178,6 @@ export default async function ParticipantPage() {
       teams: groupTeamsByGroupId.get(group.id) ?? [],
       bet: groupBonusBetsByGroupId.get(group.id) ?? null,
     })) ?? [];
-  const { data: scoreEvents, error: scoreEventsError } = current.tournamentId
-    ? await supabase.rpc("get_my_match_score_events", {
-        p_tournament_id: current.tournamentId,
-      })
-    : { data: [], error: null };
-  const matchesById = new Map(normalizedMatches.map((match) => [match.id, match]));
-  const myScoreEvents = (scoreEvents ?? []) as MyMatchScoreEvent[];
-  const normalizedScoreEvents =
-    myScoreEvents.map((event) => ({
-      id: event.event_id,
-      source_type: event.source_type,
-      category: event.category,
-      points: event.points,
-      reason: event.reason,
-      matches: matchesById.get(event.source_id) ?? null,
-    }));
   const { data: publishedRows } = current.tournamentId
     ? await supabase.rpc("get_latest_published_leaderboard", {
         p_tournament_id: current.tournamentId,
@@ -262,12 +236,6 @@ export default async function ParticipantPage() {
           <h2>Visible Bets</h2>
           <p>Participant match bets after the relevant match day is locked.</p>
           <VisibleMatchBets bets={visibleMatchBets ?? []} matches={normalizedMatches} />
-        </article>
-        <article className="panel wide-panel">
-          <h2>Your Score</h2>
-          <p>Draft points from matches that already have official results.</p>
-          {scoreEventsError ? <p className="form-message error">{scoreEventsError.message}</p> : null}
-          <ParticipantScoreSummary events={normalizedScoreEvents} />
         </article>
         <article className="panel wide-panel">
           <h2>Completed Matches</h2>

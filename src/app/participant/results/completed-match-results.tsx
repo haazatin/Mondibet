@@ -20,37 +20,53 @@ interface CompletedMatchResultsProps {
 }
 
 export function CompletedMatchResults({ results }: CompletedMatchResultsProps) {
+  const total = results.reduce((sum, result) => sum + result.points, 0);
+
   if (results.length === 0) {
-    return <p className="empty-state">Completed match details will appear after results are entered.</p>;
+    return (
+      <div className="score-summary">
+        <div className="score-total">
+          <span>Your draft total</span>
+          <strong>0</strong>
+        </div>
+        <p className="empty-state">Completed match details will appear after results are entered.</p>
+      </div>
+    );
   }
 
   return (
-    <div className="table-wrap score-summary">
-      <table className="data-table">
-        <thead>
-          <tr>
-            <th>Match</th>
-            <th>Your bet</th>
-            <th>Actual result</th>
-            <th>Points</th>
-            <th>Breakdown</th>
-          </tr>
-        </thead>
-        <tbody>
-          {results.map((result) => (
-            <tr key={result.match_id}>
-              <td>
-                {result.sort_order} · {result.home_team_name ?? "TBD"} vs{" "}
-                {result.away_team_name ?? "TBD"}
-              </td>
-              <td>{formatBet(result)}</td>
-              <td>{formatActualResult(result)}</td>
-              <td>{result.points}</td>
-              <td>{result.reasons || "No points"}</td>
+    <div className="score-summary">
+      <div className="score-total">
+        <span>Your draft total</span>
+        <strong>{total}</strong>
+      </div>
+      <div className="table-wrap">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Match</th>
+              <th>Your bet</th>
+              <th>Actual result</th>
+              <th>Points</th>
+              <th>Breakdown</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {results.map((result) => (
+              <tr key={result.match_id}>
+                <td>
+                  {result.sort_order} · {result.home_team_name ?? "TBD"} vs{" "}
+                  {result.away_team_name ?? "TBD"}
+                </td>
+                <td>{formatBet(result)}</td>
+                <td>{formatActualResult(result)}</td>
+                <td>{result.points}</td>
+                <td>{result.reasons || "No points"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
