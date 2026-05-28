@@ -439,6 +439,15 @@ textarea {
   justify-content: space-between;
 }
 
+.panel-heading-actions {
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.panel-heading-actions h2 {
+  margin-bottom: 12px;
+}
+
 .match-bet-card,
 .result-entry-card {
   border: 1px solid var(--line);

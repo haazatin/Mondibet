@@ -5,6 +5,7 @@ import {
   type BonusResultGroup,
   type GeneralBonusResult,
 } from "@/app/admin/bonus-results/bonus-result-panel";
+import { CollapsibleAdminPanel } from "@/app/admin/collapsible-admin-panel";
 import { signOut } from "@/app/auth/actions";
 import { LeaderboardPublishPanel } from "@/app/admin/leaderboard/leaderboard-publish-panel";
 import { MatchForm } from "@/app/admin/matches/match-form";
@@ -233,32 +234,6 @@ export default async function AdminPage() {
           <ParticipantList participants={participants ?? []} />
         </article>
         <article className="panel wide-panel">
-          <h2>Tournament Setup</h2>
-          <p>Add teams, groups, and group assignments before creating matches.</p>
-          <SetupForms teams={teams ?? []} groups={groups ?? []} />
-          <SetupLists teams={teams ?? []} groups={groups ?? []} groupTeams={normalizedGroupTeams} />
-        </article>
-        <article className="panel wide-panel">
-          <h2>Matches</h2>
-          <p>Create fixtures. The daily lock is calculated from the first kickoff of each day.</p>
-          <MatchForm teams={teams ?? []} groups={groups ?? []} />
-          <MatchList matches={normalizedMatches} />
-        </article>
-        <article className="panel wide-panel">
-          <h2>Results</h2>
-          <p>Enter official results. Saving recalculates score events for submitted bets.</p>
-          <ResultEntryList matches={resultEntryMatches} />
-        </article>
-        <article className="panel wide-panel">
-          <h2>Bonus Results</h2>
-          <p>Enter official bonus outcomes. Saving recalculates bonus score events.</p>
-          <BonusResultPanel
-            generalResult={(generalBonusResult ?? null) as GeneralBonusResult | null}
-            groups={normalizedBonusResultGroups}
-            teams={teams ?? []}
-          />
-        </article>
-        <article className="panel wide-panel">
           <h2>Bet Overrides</h2>
           <p>Enter or correct participant match bets after lock with a required audit reason.</p>
           <MatchBetOverrideForm
@@ -278,11 +253,6 @@ export default async function AdminPage() {
           <AuditLog events={auditEvents ?? []} />
         </article>
         <article className="panel wide-panel">
-          <h2>Scoring Preview</h2>
-          <p>Draft score events generated from official results and submitted bets.</p>
-          <ScoringPreview events={normalizedScoreEvents} />
-        </article>
-        <article className="panel wide-panel">
           <h2>Publish Leaderboard</h2>
           <p>Review draft standings and publish a snapshot for participants.</p>
           <LeaderboardPublishPanel
@@ -290,6 +260,41 @@ export default async function AdminPage() {
             latestPublishedAt={latestPublishedSnapshot?.created_at ?? null}
           />
         </article>
+        <article className="panel wide-panel">
+          <h2>Results</h2>
+          <p>Enter official results. Saving recalculates score events for submitted bets.</p>
+          <ResultEntryList matches={resultEntryMatches} />
+        </article>
+        <CollapsibleAdminPanel
+          description="Add teams, groups, and group assignments before creating matches."
+          title="Tournament Setup"
+        >
+          <SetupForms teams={teams ?? []} groups={groups ?? []} />
+          <SetupLists teams={teams ?? []} groups={groups ?? []} groupTeams={normalizedGroupTeams} />
+        </CollapsibleAdminPanel>
+        <CollapsibleAdminPanel
+          description="Create fixtures. The daily lock is calculated from the first kickoff of each day."
+          title="Matches"
+        >
+          <MatchForm teams={teams ?? []} groups={groups ?? []} />
+          <MatchList matches={normalizedMatches} />
+        </CollapsibleAdminPanel>
+        <CollapsibleAdminPanel
+          description="Draft score events generated from official results and submitted bets."
+          title="Scoring Preview"
+        >
+          <ScoringPreview events={normalizedScoreEvents} />
+        </CollapsibleAdminPanel>
+        <CollapsibleAdminPanel
+          description="Enter official bonus outcomes. Saving recalculates bonus score events."
+          title="Bonus Results"
+        >
+          <BonusResultPanel
+            generalResult={(generalBonusResult ?? null) as GeneralBonusResult | null}
+            groups={normalizedBonusResultGroups}
+            teams={teams ?? []}
+          />
+        </CollapsibleAdminPanel>
       </section>
     </main>
   );
