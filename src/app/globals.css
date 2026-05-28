@@ -627,36 +627,6 @@ textarea {
   opacity: 1;
 }
 
-.submitted-bonus-summary {
-  background: #f1f3f1;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 12px;
-}
-
-.submitted-bonus-summary dl {
-  display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin: 10px 0 0;
-}
-
-.submitted-bonus-summary div {
-  min-width: 0;
-}
-
-.submitted-bonus-summary dt {
-  color: var(--muted);
-  font-size: 13px;
-  margin-bottom: 4px;
-}
-
-.submitted-bonus-summary dd {
-  font-weight: 700;
-  margin: 0;
-  overflow-wrap: anywhere;
-}
-
 .bonus-form-grid {
   display: grid;
   gap: 14px;
@@ -764,8 +734,7 @@ textarea {
   .result-form:not(:has(.advancing-field)),
   .override-form,
   .bonus-form-grid,
-  .bonus-group-grid,
-  .submitted-bonus-summary dl {
+  .bonus-group-grid {
     grid-template-columns: 1fr;
   }
 
