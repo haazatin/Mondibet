@@ -53,6 +53,24 @@ export async function saveMatchBet(
     return { status: "error", message: "Match was not found." };
   }
 
+  const { data: existingBet, error: existingBetError } = await supabase
+    .from("match_bets")
+    .select("id")
+    .eq("match_id", match.id)
+    .eq("participant_id", current.participantId)
+    .maybeSingle();
+
+  if (existingBetError) {
+    return { status: "error", message: existingBetError.message };
+  }
+
+  if (existingBet) {
+    return {
+      status: "error",
+      message: "This bet is already submitted. Ask the admin to override it if needed.",
+    };
+  }
+
   const dailyLockAt = new Date(match.daily_lock_at);
 
   if (Date.now() >= dailyLockAt.getTime()) {
@@ -74,15 +92,15 @@ export async function saveMatchBet(
     return { status: "error", message: "Advancing team must belong to this match." };
   }
 
-  const { error: upsertError } = await supabase.rpc("submit_match_bet", {
+  const { error: submitError } = await supabase.rpc("submit_match_bet", {
     p_match_id: match.id,
     p_predicted_home_score_90: predictedHomeScore90,
     p_predicted_away_score_90: predictedAwayScore90,
     p_predicted_advancing_team_id: isKnockout && isDrawPrediction ? predictedAdvancingTeamId : null,
   });
 
-  if (upsertError) {
-    if (upsertError.message.toLowerCase().includes("row-level security")) {
+  if (submitError) {
+    if (submitError.message.toLowerCase().includes("row-level security")) {
       return {
         status: "error",
         message:
@@ -90,7 +108,7 @@ export async function saveMatchBet(
       };
     }
 
-    return { status: "error", message: upsertError.message };
+    return { status: "error", message: submitError.message };
   }
 
   revalidatePath("/participant");

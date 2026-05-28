@@ -82,7 +82,8 @@ function MatchBetCard({ match }: { match: ParticipantMatch }) {
   const isKnockout = knockoutStages.has(match.stage);
   const homeTeam = match.home_team;
   const awayTeam = match.away_team;
-  const canSubmit = Boolean(homeTeam && awayTeam);
+  const isSubmitted = Boolean(match.bet);
+  const canSubmit = Boolean(homeTeam && awayTeam && !isSubmitted);
 
   return (
     <article className="match-bet-card">
@@ -147,12 +148,16 @@ function MatchBetCard({ match }: { match: ParticipantMatch }) {
           </label>
         ) : null}
         <button className="primary-button bet-submit-button" disabled={!canSubmit || pending} type="submit">
-          {pending ? "Saving..." : match.bet ? "Update bet" : "Save bet"}
+          {pending ? "Saving..." : isSubmitted ? "Bet submitted" : "Save bet"}
         </button>
       </form>
 
       <div className="bet-card-footer">
-        {match.bet ? <span>Saved {formatDate(match.bet.submitted_at)}</span> : <span>No bet yet</span>}
+        {match.bet ? (
+          <span>Saved {formatDate(match.bet.submitted_at)}. Ask the admin for changes.</span>
+        ) : (
+          <span>No bet yet</span>
+        )}
         {state.message ? (
           <span className={state.status === "error" ? "form-message error" : "form-message"}>
             {state.message}
