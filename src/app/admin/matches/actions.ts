@@ -2,7 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { getCurrentUserRole } from "@/lib/auth/roles";
-import { getDailyBettingLockTimeForKickoffs, getIsraelMatchDay } from "@/lib/scoring/deadlines";
+import {
+  getDailyBettingLockTimeForKickoffs,
+  getIsraelDayStartForDate,
+  getIsraelMatchDay,
+  getNextIsraelMatchDay,
+  parseIsraelDateTimeLocal,
+} from "@/lib/scoring/deadlines";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { TournamentStage } from "@/types/tournament";
 
@@ -39,9 +45,9 @@ export async function addMatch(
     return { status: "error", message: "Home and away teams must be different." };
   }
 
-  const startsAt = new Date(startsAtRaw);
+  const startsAt = parseIsraelDateTimeLocal(startsAtRaw);
 
-  if (Number.isNaN(startsAt.getTime())) {
+  if (!startsAt || Number.isNaN(startsAt.getTime())) {
     return { status: "error", message: "Kickoff time is invalid." };
   }
 
@@ -53,9 +59,8 @@ export async function addMatch(
   }
 
   const matchDay = getIsraelMatchDay(startsAt);
-  const dayStart = new Date(`${matchDay}T00:00:00+03:00`);
-  const nextDayStart = new Date(dayStart);
-  nextDayStart.setDate(nextDayStart.getDate() + 1);
+  const dayStart = getIsraelDayStartForDate(matchDay);
+  const nextDayStart = getIsraelDayStartForDate(getNextIsraelMatchDay(matchDay));
 
   const { data: existingMatches, error: existingError } = await supabase
     .from("matches")

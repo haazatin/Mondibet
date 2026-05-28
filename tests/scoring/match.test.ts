@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getDailyBettingLockTime } from "@/lib/scoring/deadlines";
+import { getDailyBettingLockTime, parseIsraelDateTimeLocal } from "@/lib/scoring/deadlines";
 import { scoreMatchBet } from "@/lib/scoring/match";
 import type { MatchContext } from "@/types/tournament";
 
@@ -93,8 +93,7 @@ describe("getDailyBettingLockTime", () => {
       matchDay,
     );
 
-    expect(lock.getHours()).toBe(12);
-    expect(lock.getMinutes()).toBe(0);
+    expect(lock.toISOString()).toBe("2026-06-12T09:00:00.000Z");
   });
 
   it("locks at first kickoff when it is before noon", () => {
@@ -107,8 +106,12 @@ describe("getDailyBettingLockTime", () => {
       matchDay,
     );
 
-    expect(lock.getHours()).toBe(11);
-    expect(lock.getMinutes()).toBe(0);
+    expect(lock.toISOString()).toBe("2026-06-12T08:00:00.000Z");
+  });
+
+  it("parses admin kickoff input as Israel wall time", () => {
+    const kickoff = parseIsraelDateTimeLocal("2026-06-12T21:30");
+
+    expect(kickoff?.toISOString()).toBe("2026-06-12T18:30:00.000Z");
   });
 });
-
