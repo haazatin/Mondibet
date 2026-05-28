@@ -31,6 +31,14 @@ interface PublishedLeaderboardRow {
   streak_points: number;
 }
 
+interface MatchBetRow {
+  match_id: string;
+  predicted_home_score_90: number;
+  predicted_away_score_90: number;
+  predicted_advancing_team_id: string | null;
+  submitted_at: string;
+}
+
 export default async function ParticipantPage() {
   if (!hasPublicSupabaseEnv()) {
     redirect("/dashboard");
@@ -78,13 +86,10 @@ export default async function ParticipantPage() {
           .order("sort_order", { ascending: true })
       : { data: [], error: null };
 
-  const { data: bets, error: betsError } = effectiveParticipantId
-    ? await supabase
-        .from("match_bets")
-        .select(
-          "match_id,predicted_home_score_90,predicted_away_score_90,predicted_advancing_team_id,submitted_at",
-        )
-        .eq("participant_id", effectiveParticipantId)
+  const { data: bets, error: betsError } = current.tournamentId
+    ? await supabase.rpc("get_my_match_bets", {
+        p_tournament_id: current.tournamentId,
+      })
     : { data: [], error: null };
   const { data: teams } = current.tournamentId
     ? await supabase
@@ -132,7 +137,8 @@ export default async function ParticipantPage() {
       })
     : { data: [] };
 
-  const betsByMatchId = new Map((bets ?? []).map((bet) => [bet.match_id, bet]));
+  const normalizedBets = (bets ?? []) as MatchBetRow[];
+  const betsByMatchId = new Map(normalizedBets.map((bet) => [bet.match_id, bet]));
   const normalizedMatches: ParticipantMatch[] =
     matches?.map((match) => ({
       id: match.id,
