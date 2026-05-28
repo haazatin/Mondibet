@@ -118,7 +118,7 @@ function GeneralBonusForm({
   const isDisabled = disabled || pending || isSubmitted;
 
   return (
-    <form action={formAction} className={isSubmitted ? "bonus-form locked-form" : "bonus-form"}>
+    <form action={formAction} className={isSubmitted ? "bonus-form submitted-bonus-form" : "bonus-form"}>
       <h3>General Bonus</h3>
       {bet ? <GeneralBonusSummary bet={bet} groups={groups} teams={teams} /> : null}
       <div className="bonus-form-grid">
@@ -232,7 +232,7 @@ function GroupBonusForm({ disabled, group }: { disabled: boolean; group: BonusGr
   const isDisabled = disabled || pending || group.teams.length < 3 || isSubmitted;
 
   return (
-    <form action={formAction} className={isSubmitted ? "bonus-form locked-form" : "bonus-form"}>
+    <form action={formAction} className={isSubmitted ? "bonus-form submitted-bonus-form" : "bonus-form"}>
       <input name="groupId" type="hidden" value={group.id} />
       <h3>{group.name}</h3>
       {group.bet ? <GroupBonusSummary group={group} /> : null}

@@ -608,19 +608,19 @@ textarea {
   margin: 0;
 }
 
-.locked-form {
+.submitted-bonus-form {
   background: #ffffff;
   border-color: var(--line);
 }
 
-.locked-form .field input,
-.locked-form .field select {
+.submitted-bonus-form .field input,
+.submitted-bonus-form .field select {
   background: #f1f3f1;
   border-color: #d6dedb;
   color: var(--muted);
 }
 
-.locked-form .bonus-submit-button:disabled {
+.submitted-bonus-form .bonus-submit-button:disabled {
   background: #6fa49b;
   border-color: #6fa49b;
   color: #ffffff;
