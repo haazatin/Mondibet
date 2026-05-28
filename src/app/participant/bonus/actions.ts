@@ -114,5 +114,9 @@ function friendlyBonusError(message: string): string {
     return "Bonus betting is locked.";
   }
 
+  if (message.toLowerCase().includes("already submitted")) {
+    return "This bonus bet is already submitted. Ask the admin to override it if needed.";
+  }
+
   return message;
 }

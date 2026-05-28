@@ -15,21 +15,32 @@ export interface CompletedMatchResult {
   reasons: string;
 }
 
-interface CompletedMatchResultsProps {
-  results: CompletedMatchResult[];
+export interface CompletedBonusResult {
+  result_key: string;
+  sort_order: number;
+  bet_name: string;
+  user_bet: string;
+  actual_result: string;
+  points: number;
+  breakdown: string;
 }
 
-export function CompletedMatchResults({ results }: CompletedMatchResultsProps) {
-  const total = results.reduce((sum, result) => sum + result.points, 0);
+interface CompletedMatchResultsProps {
+  bonusResults: CompletedBonusResult[];
+  matchResults: CompletedMatchResult[];
+}
 
-  if (results.length === 0) {
+export function CompletedMatchResults({ bonusResults, matchResults }: CompletedMatchResultsProps) {
+  const total = [...matchResults, ...bonusResults].reduce((sum, result) => sum + result.points, 0);
+
+  if (matchResults.length === 0 && bonusResults.length === 0) {
     return (
       <div className="score-summary">
         <div className="score-total">
           <span>Your draft total</span>
           <strong>0</strong>
         </div>
-        <p className="empty-state">Completed match details will appear after results are entered.</p>
+        <p className="empty-state">Completed bet details will appear after results are entered.</p>
       </div>
     );
   }
@@ -44,7 +55,7 @@ export function CompletedMatchResults({ results }: CompletedMatchResultsProps) {
         <table className="data-table">
           <thead>
             <tr>
-              <th>Match</th>
+              <th>Bet</th>
               <th>Your bet</th>
               <th>Actual result</th>
               <th>Points</th>
@@ -52,7 +63,7 @@ export function CompletedMatchResults({ results }: CompletedMatchResultsProps) {
             </tr>
           </thead>
           <tbody>
-            {results.map((result) => (
+            {matchResults.map((result) => (
               <tr key={result.match_id}>
                 <td>
                   {result.sort_order} · {result.home_team_name ?? "TBD"} vs{" "}
@@ -62,6 +73,15 @@ export function CompletedMatchResults({ results }: CompletedMatchResultsProps) {
                 <td>{formatActualResult(result)}</td>
                 <td>{result.points}</td>
                 <td>{result.reasons || "No points"}</td>
+              </tr>
+            ))}
+            {bonusResults.map((result) => (
+              <tr key={result.result_key}>
+                <td>{result.bet_name}</td>
+                <td>{result.user_bet || "No bet"}</td>
+                <td>{result.actual_result || "No result"}</td>
+                <td>{result.points}</td>
+                <td>{result.breakdown || "No points"}</td>
               </tr>
             ))}
           </tbody>

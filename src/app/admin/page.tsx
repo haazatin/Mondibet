@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { AuditLog } from "@/app/admin/audit/audit-log";
+import { ParticipantBetsPanel } from "@/app/admin/bets/participant-bets-panel";
 import {
   BonusResultPanel,
   type BonusResultGroup,
@@ -115,6 +116,15 @@ export default async function AdminPage() {
         .eq("tournament_id", current.tournamentId)
         .order("calculated_at", { ascending: false })
     : { data: [] };
+  const { data: matchBets } = current.tournamentId
+    ? await supabase
+        .from("match_bets")
+        .select(
+          "match_id,participant_id,predicted_home_score_90,predicted_away_score_90,predicted_advancing_team_id,submitted_at,participants!inner(display_name,tournament_id)",
+        )
+        .eq("participants.tournament_id", current.tournamentId)
+        .order("submitted_at", { ascending: true })
+    : { data: [] };
   const { data: groupBonusResults } = current.tournamentId
     ? await supabase
         .from("group_bonus_results")
@@ -141,6 +151,16 @@ export default async function AdminPage() {
       calculated_at: event.calculated_at,
       participants: Array.isArray(event.participants) ? event.participants[0] : event.participants,
       matches: matchesById.get(event.source_id) ?? null,
+    })) ?? [];
+  const normalizedMatchBets =
+    matchBets?.map((bet) => ({
+      match_id: bet.match_id,
+      participant_id: bet.participant_id,
+      participant_name: bet.participants[0]?.display_name ?? "Participant",
+      predicted_home_score_90: bet.predicted_home_score_90,
+      predicted_away_score_90: bet.predicted_away_score_90,
+      predicted_advancing_team_id: bet.predicted_advancing_team_id,
+      submitted_at: bet.submitted_at,
     })) ?? [];
   const groupBonusResultsByGroupId = new Map(
     (groupBonusResults ?? []).map((result) => [result.group_id, result]),
@@ -227,9 +247,10 @@ export default async function AdminPage() {
       </header>
 
       <section className="dashboard" aria-label="Admin modules">
-        <article className="panel wide-panel">
-          <h2>Bet Overrides</h2>
-          <p>Enter or correct participant match bets after lock with a required audit reason.</p>
+        <CollapsibleAdminPanel
+          description="Enter or correct participant match bets after lock with a required audit reason."
+          title="Bet Overrides"
+        >
           <MatchBetOverrideForm
             participants={participants ?? []}
             matches={normalizedMatches}
@@ -240,20 +261,28 @@ export default async function AdminPage() {
             participants={participants ?? []}
             teams={teams ?? []}
           />
-        </article>
-        <article className="panel wide-panel">
-          <h2>Publish Leaderboard</h2>
-          <p>Review draft standings and publish a snapshot for participants.</p>
+        </CollapsibleAdminPanel>
+        <CollapsibleAdminPanel
+          description="Review participant match bets. Finished games are hidden by default."
+          title="Participant Bets"
+        >
+          <ParticipantBetsPanel bets={normalizedMatchBets} matches={normalizedMatches} />
+        </CollapsibleAdminPanel>
+        <CollapsibleAdminPanel
+          description="Review draft standings and publish a snapshot for participants."
+          title="Publish Leaderboard"
+        >
           <LeaderboardPublishPanel
             draftRows={draftLeaderboardRows}
             latestPublishedAt={latestPublishedSnapshot?.created_at ?? null}
           />
-        </article>
-        <article className="panel wide-panel">
-          <h2>Results</h2>
-          <p>Enter official results. Saving recalculates score events for submitted bets.</p>
+        </CollapsibleAdminPanel>
+        <CollapsibleAdminPanel
+          description="Enter official results. Saving recalculates score events for submitted bets."
+          title="Results"
+        >
           <ResultEntryList matches={resultEntryMatches} />
-        </article>
+        </CollapsibleAdminPanel>
         <CollapsibleAdminPanel
           description="Recent admin override and correction history."
           title="Audit Log"

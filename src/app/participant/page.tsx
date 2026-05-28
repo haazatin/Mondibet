@@ -10,6 +10,7 @@ import { VisibleMatchBets } from "@/app/participant/bets/visible-match-bets";
 import { PublishedLeaderboard } from "@/app/participant/leaderboard/published-leaderboard";
 import {
   CompletedMatchResults,
+  type CompletedBonusResult,
   type CompletedMatchResult,
 } from "@/app/participant/results/completed-match-results";
 import { getCurrentUserRole } from "@/lib/auth/roles";
@@ -136,6 +137,11 @@ export default async function ParticipantPage() {
         p_tournament_id: current.tournamentId,
       })
     : { data: [] };
+  const { data: completedBonusResults } = current.tournamentId
+    ? await supabase.rpc("get_my_completed_bonus_results", {
+        p_tournament_id: current.tournamentId,
+      })
+    : { data: [] };
 
   const normalizedBets = (bets ?? []) as MatchBetRow[];
   const betsByMatchId = new Map(normalizedBets.map((bet) => [bet.match_id, bet]));
@@ -245,9 +251,12 @@ export default async function ParticipantPage() {
           <VisibleMatchBets matches={pendingSubmittedMatches} />
         </article>
         <article className="panel wide-panel">
-          <h2>Completed Matches</h2>
-          <p>Your bet, the official result, and the points you earned for each closed match.</p>
-          <CompletedMatchResults results={(completedMatchResults ?? []) as CompletedMatchResult[]} />
+          <h2>Completed Bets</h2>
+          <p>Your bet, the official result, and the points you earned for each completed bet.</p>
+          <CompletedMatchResults
+            bonusResults={(completedBonusResults ?? []) as CompletedBonusResult[]}
+            matchResults={(completedMatchResults ?? []) as CompletedMatchResult[]}
+          />
         </article>
       </section>
     </main>

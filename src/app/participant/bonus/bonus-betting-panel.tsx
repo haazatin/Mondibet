@@ -78,24 +78,24 @@ export function BonusBettingPanel({
       </div>
       {isHidden ? null : (
         <>
-      <div className="status-pill">
-        Bonus lock: {bonusLockAt ? formatDate(bonusLockAt) : "not configured"}
-      </div>
-      <GeneralBonusForm
-        bet={generalBet}
-        disabled={!bonusLockAt}
-        groups={groups}
-        teams={teams}
-      />
-      <div className="bonus-group-grid">
-        {groups.map((group) => (
-          <GroupBonusForm
+          <div className="status-pill">
+            Bonus lock: {bonusLockAt ? formatDate(bonusLockAt) : "not configured"}
+          </div>
+          <GeneralBonusForm
+            bet={generalBet}
             disabled={!bonusLockAt}
-            group={group}
-            key={group.id}
+            groups={groups}
+            teams={teams}
           />
-        ))}
-      </div>
+          <div className="bonus-group-grid">
+            {groups.map((group) => (
+              <GroupBonusForm
+                disabled={!bonusLockAt}
+                group={group}
+                key={group.id}
+              />
+            ))}
+          </div>
         </>
       )}
     </div>
@@ -114,10 +114,11 @@ function GeneralBonusForm({
   teams: BonusTeam[];
 }) {
   const [state, formAction, pending] = useActionState(saveGeneralBonusBet, initialState);
-  const isDisabled = disabled || pending;
+  const isSubmitted = Boolean(bet);
+  const isDisabled = disabled || pending || isSubmitted;
 
   return (
-    <form action={formAction} className="bonus-form">
+    <form action={formAction} className={isSubmitted ? "bonus-form locked-form" : "bonus-form"}>
       <h3>General Bonus</h3>
       <div className="bonus-form-grid">
         <TeamSelect
@@ -206,9 +207,13 @@ function GeneralBonusForm({
         />
       </div>
       <div className="bet-card-footer">
-        {bet ? <span>Saved {formatDate(bet.submitted_at)}</span> : <span>No general bonus yet</span>}
+        {bet ? (
+          <span>Saved {formatDate(bet.submitted_at)}. Ask the admin for changes.</span>
+        ) : (
+          <span>No general bonus yet</span>
+        )}
         <button className="primary-button" disabled={isDisabled} type="submit">
-          {pending ? "Saving..." : bet ? "Update general bonus" : "Save general bonus"}
+          {pending ? "Saving..." : isSubmitted ? "General bonus submitted" : "Save general bonus"}
         </button>
         {state.message ? (
           <span className={state.status === "error" ? "form-message error" : "form-message"}>
@@ -222,10 +227,11 @@ function GeneralBonusForm({
 
 function GroupBonusForm({ disabled, group }: { disabled: boolean; group: BonusGroup }) {
   const [state, formAction, pending] = useActionState(saveGroupBonusBet, initialState);
-  const isDisabled = disabled || pending || group.teams.length < 3;
+  const isSubmitted = Boolean(group.bet);
+  const isDisabled = disabled || pending || group.teams.length < 3 || isSubmitted;
 
   return (
-    <form action={formAction} className="bonus-form">
+    <form action={formAction} className={isSubmitted ? "bonus-form locked-form" : "bonus-form"}>
       <input name="groupId" type="hidden" value={group.id} />
       <h3>{group.name}</h3>
       <TeamSelect
@@ -253,9 +259,13 @@ function GroupBonusForm({ disabled, group }: { disabled: boolean; group: BonusGr
         teams={group.teams}
       />
       <div className="bet-card-footer">
-        {group.bet ? <span>Saved {formatDate(group.bet.submitted_at)}</span> : <span>No group bonus yet</span>}
+        {group.bet ? (
+          <span>Saved {formatDate(group.bet.submitted_at)}. Ask the admin for changes.</span>
+        ) : (
+          <span>No group bonus yet</span>
+        )}
         <button className="primary-button" disabled={isDisabled} type="submit">
-          {pending ? "Saving..." : group.bet ? "Update group" : "Save group"}
+          {pending ? "Saving..." : isSubmitted ? "Group submitted" : "Save group"}
         </button>
         {state.message ? (
           <span className={state.status === "error" ? "form-message error" : "form-message"}>

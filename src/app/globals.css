@@ -603,6 +603,10 @@ textarea {
   padding: 16px;
 }
 
+.locked-form {
+  background: #f7f8f7;
+}
+
 .bonus-form h3 {
   font-size: 16px;
   margin: 0;
