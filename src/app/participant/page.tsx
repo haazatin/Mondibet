@@ -192,13 +192,29 @@ export default async function ParticipantPage() {
   const pendingSubmittedMatches = normalizedMatches.filter(
     (match) => match.bet && !completedMatchIds.has(match.id),
   );
+  const completedBetCount =
+    ((completedMatchResults ?? []) as CompletedMatchResult[]).length +
+    ((completedBonusResults ?? []) as CompletedBonusResult[]).length;
+  const bonusBetCount = normalizedGroupBonusBets.length + (generalBonusBet ? 1 : 0);
 
   return (
-    <main className="shell">
-      <header className="app-header">
-        <div className="brand">
-          <div className="brand-title">Participant</div>
+    <main className="shell participant-shell">
+      <header className="app-header participant-hero">
+        <div className="participant-hero-copy">
+          <div className="participant-kicker">FIFA World Cup 2026</div>
+          <div className="brand-title">Apple Plaza Pool</div>
           <div className="brand-subtitle">{current.user.email}</div>
+          <div className="participant-hero-stats" aria-label="Participant summary">
+            <span>{normalizedBets.length} match bets</span>
+            <span>{bonusBetCount} bonus bets</span>
+            <span>{completedBetCount} completed</span>
+          </div>
+        </div>
+        <div className="participant-hero-scene" aria-hidden="true">
+          <span className="plaza-apple apple-one" />
+          <span className="plaza-apple apple-two" />
+          <span className="plaza-apple apple-three" />
+          <span className="plaza-fountain" />
         </div>
         <form action={signOut}>
           <button className="secondary-button" type="submit">
@@ -207,7 +223,7 @@ export default async function ParticipantPage() {
         </form>
       </header>
 
-      <section className="dashboard" aria-label="Participant modules">
+      <section className="dashboard participant-dashboard" aria-label="Participant modules">
         <article className="panel wide-panel">
           <h2>Leaderboard</h2>
           <p>Latest admin-published standings snapshot.</p>

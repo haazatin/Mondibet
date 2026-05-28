@@ -141,6 +141,179 @@ textarea {
   grid-column: span 3;
 }
 
+.participant-shell {
+  background:
+    radial-gradient(circle at 78% 8%, rgba(217, 57, 65, 0.2), transparent 24rem),
+    radial-gradient(circle at 8% 16%, rgba(255, 190, 104, 0.28), transparent 22rem),
+    linear-gradient(180deg, #252b55 0, #f3beb2 36rem, var(--background) 36.1rem);
+}
+
+.participant-hero {
+  background:
+    linear-gradient(110deg, rgba(21, 25, 69, 0.94), rgba(111, 45, 79, 0.82) 58%, rgba(248, 137, 91, 0.72)),
+    radial-gradient(circle at 72% 56%, rgba(255, 229, 168, 0.75), transparent 12rem);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 8px;
+  box-shadow: 0 22px 60px rgba(52, 24, 57, 0.22);
+  color: #fffaf3;
+  margin-bottom: 24px;
+  min-height: 220px;
+  overflow: hidden;
+  padding: 28px;
+  position: relative;
+}
+
+.participant-hero::before {
+  background:
+    linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 18px);
+  bottom: 0;
+  content: "";
+  height: 72px;
+  left: 0;
+  opacity: 0.65;
+  position: absolute;
+  right: 0;
+}
+
+.participant-hero-copy {
+  display: grid;
+  gap: 8px;
+  max-width: 620px;
+  position: relative;
+  z-index: 1;
+}
+
+.participant-kicker {
+  color: #ffdf9e;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.participant-hero .brand-title {
+  font-size: 42px;
+}
+
+.participant-hero .brand-subtitle {
+  color: rgba(255, 250, 243, 0.82);
+}
+
+.participant-hero .secondary-button {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.34);
+  color: #fffaf3;
+  position: relative;
+  z-index: 1;
+}
+
+.participant-hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.participant-hero-stats span {
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  color: #fffaf3;
+  font-size: 13px;
+  padding: 8px 12px;
+}
+
+.participant-hero-scene {
+  bottom: 24px;
+  height: 150px;
+  position: absolute;
+  right: 30px;
+  width: 300px;
+}
+
+.plaza-apple {
+  background:
+    radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.62), transparent 0.42rem),
+    linear-gradient(145deg, #ff4b58, #9d1528);
+  border-radius: 48% 52% 54% 46%;
+  box-shadow:
+    inset -10px -14px 24px rgba(92, 0, 19, 0.28),
+    0 16px 30px rgba(65, 16, 32, 0.36);
+  position: absolute;
+}
+
+.plaza-apple::before {
+  background: linear-gradient(135deg, #1a7647, #70c25e);
+  border-radius: 100% 0 100% 0;
+  content: "";
+  height: 18px;
+  position: absolute;
+  right: 2px;
+  top: -12px;
+  transform: rotate(12deg);
+  width: 30px;
+}
+
+.apple-one {
+  height: 82px;
+  right: 8px;
+  top: 12px;
+  width: 78px;
+}
+
+.apple-two {
+  height: 54px;
+  right: 150px;
+  top: 42px;
+  width: 52px;
+}
+
+.apple-three {
+  bottom: 8px;
+  height: 42px;
+  right: 92px;
+  width: 40px;
+}
+
+.plaza-fountain {
+  background:
+    radial-gradient(ellipse at center, rgba(255, 238, 186, 0.95), rgba(255, 238, 186, 0.2) 58%, transparent 60%),
+    linear-gradient(90deg, transparent, rgba(255, 246, 202, 0.76), transparent);
+  border-radius: 50%;
+  bottom: 4px;
+  height: 46px;
+  left: 28px;
+  position: absolute;
+  width: 138px;
+}
+
+.participant-dashboard .panel {
+  border-color: rgba(153, 53, 63, 0.16);
+  box-shadow: 0 14px 34px rgba(79, 42, 45, 0.08);
+}
+
+.participant-dashboard .panel h2 {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.participant-dashboard .panel h2::before {
+  background: linear-gradient(145deg, #ef4051, #a9162a);
+  border-radius: 50% 48% 52% 50%;
+  box-shadow: inset -2px -3px 5px rgba(74, 0, 17, 0.22);
+  content: "";
+  display: inline-block;
+  height: 13px;
+  width: 13px;
+}
+
+.participant-dashboard .status-pill {
+  background: #fff8ea;
+  border-color: #f0d7a3;
+}
+
 .panel h2 {
   font-size: 18px;
   margin: 0 0 12px;
@@ -692,6 +865,28 @@ textarea {
   .app-header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .participant-hero {
+    min-height: 0;
+    padding: 22px;
+  }
+
+  .participant-hero .brand-title {
+    font-size: 30px;
+  }
+
+  .participant-hero-scene {
+    bottom: -12px;
+    height: 92px;
+    opacity: 0.72;
+    right: -34px;
+    transform: scale(0.72);
+    transform-origin: bottom right;
+  }
+
+  .participant-hero-stats {
+    gap: 8px;
   }
 
   .header-actions {
