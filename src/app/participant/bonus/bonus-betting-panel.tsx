@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import {
   saveGeneralBonusBet,
   saveGroupBonusBet,
@@ -58,12 +58,26 @@ export function BonusBettingPanel({
   teams,
   generalBet,
 }: BonusBettingPanelProps) {
+  const [isHidden, setIsHidden] = useState(false);
+
   if (groups.length === 0 && teams.length === 0) {
     return <p className="empty-state">Bonus betting will appear after teams and groups are set up.</p>;
   }
 
   return (
     <div className="bonus-betting">
+      <div className="section-actions">
+        <span>Pre-tournament predictions</span>
+        <button
+          className="secondary-button"
+          onClick={() => setIsHidden((current) => !current)}
+          type="button"
+        >
+          {isHidden ? "Show bonus section" : "Hide bonus section"}
+        </button>
+      </div>
+      {isHidden ? null : (
+        <>
       <div className="status-pill">
         Bonus lock: {bonusLockAt ? formatDate(bonusLockAt) : "not configured"}
       </div>
@@ -82,6 +96,8 @@ export function BonusBettingPanel({
           />
         ))}
       </div>
+        </>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useMemo, useState } from "react";
 import { saveMatchBet, type MatchBetActionState } from "./actions";
 
 export interface ParticipantMatch {
@@ -30,17 +30,49 @@ const initialState: MatchBetActionState = {
 };
 
 const knockoutStages = new Set(["round_of_32", "round_of_16", "quarterfinal", "semifinal", "final"]);
+const defaultVisibleMatchCount = 5;
 
 export function MatchBettingList({ matches }: MatchBettingListProps) {
+  const [showAll, setShowAll] = useState(false);
+  const [loadedAt] = useState(() => new Date().toISOString());
+  const visibleMatches = useMemo(() => {
+    if (showAll) {
+      return matches;
+    }
+
+    const upcomingMatches = matches.filter((match) => match.starts_at > loadedAt);
+    return upcomingMatches.slice(0, defaultVisibleMatchCount);
+  }, [loadedAt, matches, showAll]);
+
   if (matches.length === 0) {
     return null;
   }
 
+  if (visibleMatches.length === 0) {
+    return <p className="empty-state">No upcoming matches are available.</p>;
+  }
+
   return (
-    <div className="match-bet-list">
-      {matches.map((match) => (
-        <MatchBetCard key={match.id} match={match} />
-      ))}
+    <div className="match-list-section">
+      <div className="section-actions">
+        <span>
+          Showing {visibleMatches.length} of {matches.length} matches
+        </span>
+        {matches.length > defaultVisibleMatchCount ? (
+          <button
+            className="secondary-button"
+            onClick={() => setShowAll((current) => !current)}
+            type="button"
+          >
+            {showAll ? "See less" : "See more"}
+          </button>
+        ) : null}
+      </div>
+      <div className="match-bet-list">
+        {visibleMatches.map((match) => (
+          <MatchBetCard key={match.id} match={match} />
+        ))}
+      </div>
     </div>
   );
 }

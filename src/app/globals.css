@@ -419,6 +419,26 @@ textarea {
   margin-top: 18px;
 }
 
+.match-list-section {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.match-list-section .match-bet-list {
+  margin-top: 0;
+}
+
+.section-actions {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 14px;
+  gap: 12px;
+  justify-content: space-between;
+}
+
 .match-bet-card,
 .result-entry-card {
   border: 1px solid var(--line);

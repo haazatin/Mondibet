@@ -219,6 +219,14 @@ export default async function ParticipantPage() {
 
       <section className="dashboard" aria-label="Participant modules">
         <article className="panel wide-panel">
+          <h2>Leaderboard</h2>
+          <p>Latest admin-published standings snapshot.</p>
+          <PublishedLeaderboard
+            publishedAt={publishedAt}
+            rows={normalizedPublishedRows}
+          />
+        </article>
+        <article className="panel wide-panel">
           <h2>Today&apos;s Bets</h2>
           <p>Submit and update match bets until the shared daily lock time.</p>
           {matchesError || betsError ? (
@@ -251,14 +259,6 @@ export default async function ParticipantPage() {
           <p>Draft points from matches that already have official results.</p>
           {scoreEventsError ? <p className="form-message error">{scoreEventsError.message}</p> : null}
           <ParticipantScoreSummary events={normalizedScoreEvents} />
-        </article>
-        <article className="panel">
-          <h2>Leaderboard</h2>
-          <p>Latest admin-published standings snapshot.</p>
-          <PublishedLeaderboard
-            publishedAt={publishedAt}
-            rows={normalizedPublishedRows}
-          />
         </article>
       </section>
     </main>
