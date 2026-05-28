@@ -8,6 +8,10 @@ import {
 import { MatchBettingList, type ParticipantMatch } from "@/app/participant/bets/match-betting-list";
 import { VisibleMatchBets } from "@/app/participant/bets/visible-match-bets";
 import { PublishedLeaderboard } from "@/app/participant/leaderboard/published-leaderboard";
+import {
+  CompletedMatchResults,
+  type CompletedMatchResult,
+} from "@/app/participant/results/completed-match-results";
 import { ParticipantScoreSummary } from "@/app/participant/scores/participant-score-summary";
 import { getCurrentUserRole } from "@/lib/auth/roles";
 import { hasPublicSupabaseEnv } from "@/lib/supabase/env";
@@ -137,6 +141,11 @@ export default async function ParticipantPage() {
         p_tournament_id: current.tournamentId,
       })
     : { data: [] };
+  const { data: completedMatchResults } = current.tournamentId
+    ? await supabase.rpc("get_my_completed_match_results", {
+        p_tournament_id: current.tournamentId,
+      })
+    : { data: [] };
 
   const betsByMatchId = new Map((bets ?? []).map((bet) => [bet.match_id, bet]));
   const normalizedMatches: ParticipantMatch[] =
@@ -259,6 +268,11 @@ export default async function ParticipantPage() {
           <p>Draft points from matches that already have official results.</p>
           {scoreEventsError ? <p className="form-message error">{scoreEventsError.message}</p> : null}
           <ParticipantScoreSummary events={normalizedScoreEvents} />
+        </article>
+        <article className="panel wide-panel">
+          <h2>Completed Matches</h2>
+          <p>Your bet, the official result, and the points you earned for each closed match.</p>
+          <CompletedMatchResults results={(completedMatchResults ?? []) as CompletedMatchResult[]} />
         </article>
       </section>
     </main>
