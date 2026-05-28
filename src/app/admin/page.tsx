@@ -228,12 +228,6 @@ export default async function AdminPage() {
 
       <section className="dashboard" aria-label="Admin modules">
         <article className="panel wide-panel">
-          <h2>Participants</h2>
-          <p>Add participant names and emails before inviting them to sign in.</p>
-          <ParticipantForm />
-          <ParticipantList participants={participants ?? []} />
-        </article>
-        <article className="panel wide-panel">
           <h2>Bet Overrides</h2>
           <p>Enter or correct participant match bets after lock with a required audit reason.</p>
           <MatchBetOverrideForm
@@ -248,11 +242,6 @@ export default async function AdminPage() {
           />
         </article>
         <article className="panel wide-panel">
-          <h2>Audit Log</h2>
-          <p>Recent admin override and correction history.</p>
-          <AuditLog events={auditEvents ?? []} />
-        </article>
-        <article className="panel wide-panel">
           <h2>Publish Leaderboard</h2>
           <p>Review draft standings and publish a snapshot for participants.</p>
           <LeaderboardPublishPanel
@@ -264,6 +253,18 @@ export default async function AdminPage() {
           <h2>Results</h2>
           <p>Enter official results. Saving recalculates score events for submitted bets.</p>
           <ResultEntryList matches={resultEntryMatches} />
+        </article>
+        <CollapsibleAdminPanel
+          description="Recent admin override and correction history."
+          title="Audit Log"
+        >
+          <AuditLog events={auditEvents ?? []} />
+        </CollapsibleAdminPanel>
+        <article className="panel wide-panel">
+          <h2>Participants</h2>
+          <p>Add participant names and emails before inviting them to sign in.</p>
+          <ParticipantForm />
+          <ParticipantList participants={participants ?? []} />
         </article>
         <CollapsibleAdminPanel
           description="Add teams, groups, and group assignments before creating matches."
