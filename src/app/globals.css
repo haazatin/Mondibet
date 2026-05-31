@@ -150,8 +150,8 @@ textarea {
 
 .participant-hero {
   background:
-    linear-gradient(110deg, rgba(21, 25, 69, 0.94), rgba(111, 45, 79, 0.82) 58%, rgba(248, 137, 91, 0.72)),
-    radial-gradient(circle at 72% 56%, rgba(255, 229, 168, 0.75), transparent 12rem);
+    linear-gradient(110deg, rgba(21, 25, 69, 0.96), rgba(111, 45, 79, 0.86) 58%, rgba(248, 137, 91, 0.72)),
+    radial-gradient(circle at 72% 56%, rgba(255, 229, 168, 0.72), transparent 12rem);
   border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 8px;
   box-shadow: 0 22px 60px rgba(52, 24, 57, 0.22);
@@ -165,8 +165,8 @@ textarea {
 
 .participant-hero::before {
   background:
-    linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 18px);
+    linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18), transparent),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.07) 0 1px, transparent 1px 18px);
   bottom: 0;
   content: "";
   height: 72px;
@@ -224,68 +224,26 @@ textarea {
   padding: 8px 12px;
 }
 
-.participant-hero-scene {
+.participant-hero-art {
+  background:
+    linear-gradient(180deg, rgba(21, 25, 69, 0) 48%, rgba(21, 25, 69, 0.35)),
+    url("/brand/Mondibet.jpeg") center / cover;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 8px;
   bottom: 24px;
-  height: 150px;
+  box-shadow: 0 20px 42px rgba(49, 17, 40, 0.36);
+  height: 168px;
+  overflow: hidden;
   position: absolute;
   right: 30px;
-  width: 300px;
+  width: 230px;
 }
 
-.plaza-apple {
-  background:
-    radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.62), transparent 0.42rem),
-    linear-gradient(145deg, #ff4b58, #9d1528);
-  border-radius: 48% 52% 54% 46%;
-  box-shadow:
-    inset -10px -14px 24px rgba(92, 0, 19, 0.28),
-    0 16px 30px rgba(65, 16, 32, 0.36);
-  position: absolute;
-}
-
-.plaza-apple::before {
-  background: linear-gradient(135deg, #1a7647, #70c25e);
-  border-radius: 100% 0 100% 0;
+.participant-hero-art::after {
+  background: linear-gradient(135deg, rgba(255, 223, 158, 0.42), transparent 42%);
   content: "";
-  height: 18px;
+  inset: 0;
   position: absolute;
-  right: 2px;
-  top: -12px;
-  transform: rotate(12deg);
-  width: 30px;
-}
-
-.apple-one {
-  height: 82px;
-  right: 8px;
-  top: 12px;
-  width: 78px;
-}
-
-.apple-two {
-  height: 54px;
-  right: 150px;
-  top: 42px;
-  width: 52px;
-}
-
-.apple-three {
-  bottom: 8px;
-  height: 42px;
-  right: 92px;
-  width: 40px;
-}
-
-.plaza-fountain {
-  background:
-    radial-gradient(ellipse at center, rgba(255, 238, 186, 0.95), rgba(255, 238, 186, 0.2) 58%, transparent 60%),
-    linear-gradient(90deg, transparent, rgba(255, 246, 202, 0.76), transparent);
-  border-radius: 50%;
-  bottom: 4px;
-  height: 46px;
-  left: 28px;
-  position: absolute;
-  width: 138px;
 }
 
 .participant-dashboard .panel {
@@ -876,13 +834,14 @@ textarea {
     font-size: 30px;
   }
 
-  .participant-hero-scene {
-    bottom: -12px;
-    height: 92px;
-    opacity: 0.72;
-    right: -34px;
-    transform: scale(0.72);
-    transform-origin: bottom right;
+  .participant-hero-art {
+    bottom: auto;
+    height: 180px;
+    margin-top: 12px;
+    max-width: 100%;
+    position: relative;
+    right: auto;
+    width: 100%;
   }
 
   .participant-hero-stats {

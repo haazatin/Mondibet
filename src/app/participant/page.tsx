@@ -202,7 +202,7 @@ export default async function ParticipantPage() {
       <header className="app-header participant-hero">
         <div className="participant-hero-copy">
           <div className="participant-kicker">FIFA World Cup 2026</div>
-          <div className="brand-title">Apple Plaza Pool</div>
+          <div className="brand-title">Mondibet</div>
           <div className="brand-subtitle">{current.user.email}</div>
           <div className="participant-hero-stats" aria-label="Participant summary">
             <span>{normalizedBets.length} match bets</span>
@@ -210,12 +210,7 @@ export default async function ParticipantPage() {
             <span>{completedBetCount} completed</span>
           </div>
         </div>
-        <div className="participant-hero-scene" aria-hidden="true">
-          <span className="plaza-apple apple-one" />
-          <span className="plaza-apple apple-two" />
-          <span className="plaza-apple apple-three" />
-          <span className="plaza-fountain" />
-        </div>
+        <div className="participant-hero-art" aria-hidden="true" />
         <form action={signOut}>
           <button className="secondary-button" type="submit">
             Sign out
