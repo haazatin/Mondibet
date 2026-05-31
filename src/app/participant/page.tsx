@@ -210,7 +210,6 @@ export default async function ParticipantPage() {
             <span>{completedBetCount} completed</span>
           </div>
         </div>
-        <div className="participant-hero-art" aria-hidden="true" />
         <form action={signOut}>
           <button className="secondary-button" type="submit">
             Sign out
