@@ -371,21 +371,6 @@ textarea {
   margin: 0;
 }
 
-.debug-panel {
-  max-width: 980px;
-}
-
-.debug-panel pre {
-  background: #101819;
-  border-radius: 6px;
-  color: #e7efec;
-  font-size: 13px;
-  line-height: 1.5;
-  margin: 0;
-  overflow-x: auto;
-  padding: 16px;
-}
-
 .field {
   display: grid;
   gap: 8px;
@@ -434,16 +419,6 @@ textarea {
 
 .form-message.error {
   color: #a33d2f;
-}
-
-.debug-note {
-  background: #eef4f1;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  color: var(--muted);
-  font-size: 14px;
-  margin: 14px 0 0;
-  padding: 10px 12px;
 }
 
 .text-link {

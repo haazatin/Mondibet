@@ -110,10 +110,10 @@ Expected environment variables:
 ```text
 NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY
-SUPABASE_SERVICE_ROLE_KEY
+NEXT_PUBLIC_SITE_URL
 ```
 
-The service role key must only be used server-side.
+`NEXT_PUBLIC_SITE_URL` should be the canonical deployed app URL and is used to build Supabase auth callback redirects.
 
 ## GitHub Deployment Flow
 
