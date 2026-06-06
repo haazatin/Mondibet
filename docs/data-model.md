@@ -228,5 +228,5 @@ Only published snapshots are visible to participants. Draft recalculations remai
 - Store snapshots so published leaderboards do not unexpectedly change without admin intent.
 - Keep scoring rules in code first; optionally persist rule configuration later.
 - Admin corrections should replace the participant-visible value while preserving before/after values in the admin audit log.
-- Participant login uses Supabase Auth with Google SSO as the primary method and email magic links as a fallback.
+- Participant login uses Supabase Auth with Google SSO.
 - Participant self-submission is blocked after lock; admin overrides remain available with a required reason.

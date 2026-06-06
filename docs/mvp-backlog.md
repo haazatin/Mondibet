@@ -5,7 +5,7 @@
 - Initialize Next.js app.
 - Add Supabase client setup.
 - Create database migrations for core tables.
-- Add Supabase Google SSO auth with email magic-link fallback.
+- Add Supabase Google SSO auth.
 - Add roles: participant, admin.
 - Add seed data support for tournament setup.
 

@@ -8,14 +8,6 @@
 4. App verifies that the signed-in email matches an invited participant.
 5. App signs the participant in and loads their tournament dashboard.
 
-Fallback:
-
-1. Participant enters their email address.
-2. App sends a Supabase magic-link email.
-3. Participant clicks the email link.
-4. App verifies that the signed-in email matches an invited participant.
-5. App loads their tournament dashboard.
-
 ## Participant: Submit Daily Match Bets
 
 1. Participant signs in.

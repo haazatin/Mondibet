@@ -15,7 +15,7 @@ Mondibet is an application for managing a friendly FIFA World Cup betting game. 
 
 Participants need to:
 
-- Sign in with Google SSO, with email magic link kept as a fallback.
+- Sign in with Google SSO.
 - Submit daily match bets before the deadline.
 - Submit pre-tournament bonus bets.
 - See their submitted bets.
@@ -38,7 +38,7 @@ The administrator needs to:
 ## MVP Goals
 
 - Participant registration or invitation.
-- Participant login with Google SSO, with email magic link fallback.
+- Participant login with Google SSO.
 - Daily match betting.
 - Pre-tournament bonus betting.
 - Admin result entry.

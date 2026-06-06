@@ -4,11 +4,6 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-export interface LoginActionState {
-  status: "idle" | "success" | "error";
-  message: string;
-}
-
 async function getRequestOrigin(formData: FormData) {
   const formOrigin = String(formData.get("origin") ?? "").trim();
 
@@ -29,52 +24,6 @@ async function getRequestOrigin(formData: FormData) {
 
   const protocol = requestHeaders.get("x-forwarded-proto") ?? "http";
   return `${protocol}://${host}`;
-}
-
-export async function sendMagicLink(
-  _previousState: LoginActionState,
-  formData: FormData,
-): Promise<LoginActionState> {
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
-
-  if (!email) {
-    return {
-      status: "error",
-      message: "Enter an email address.",
-    };
-  }
-
-  const origin = await getRequestOrigin(formData);
-
-  try {
-    const supabase = await createSupabaseServerClient();
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${origin}/auth/callback`,
-      },
-    });
-
-    if (error) {
-      return {
-        status: "error",
-        message: error.message,
-      };
-    }
-  } catch (error) {
-    return {
-      status: "error",
-      message:
-        error instanceof Error
-          ? error.message
-          : "Supabase is not configured yet. Add environment variables and try again.",
-    };
-  }
-
-  return {
-    status: "success",
-    message: "Magic link sent. Check your email to continue.",
-  };
 }
 
 export async function signInWithGoogle(formData: FormData) {

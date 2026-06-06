@@ -15,7 +15,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <section className="auth-layout">
         <div className="brand auth-brand">
           <div className="brand-title">Mondibet</div>
-          <div className="brand-subtitle">Sign in with Google or email</div>
+          <div className="brand-subtitle">Sign in with Google</div>
         </div>
 
         <LoginForm loginError={error} />

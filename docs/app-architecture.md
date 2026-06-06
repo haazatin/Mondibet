@@ -4,7 +4,7 @@
 
 - Frontend: Next.js on Vercel.
 - Backend/API: Next.js API routes or server actions on Vercel.
-- Database/Auth: Supabase, using Google SSO as the primary login method and email magic links as a fallback.
+- Database/Auth: Supabase, using Google SSO as the login method.
 - Source control and deploy trigger: GitHub.
 
 ## Deployment Shape
@@ -35,8 +35,7 @@ Supabase stores data and handles auth. Supabase is not where the primary scoring
 
 Participants and admins authenticate through Supabase Auth.
 
-- Primary method: Google SSO.
-- Fallback method: email magic link.
+- Login method: Google SSO.
 - Invitation gate: a signed-in user's email must match a participant row created by an admin, or the user must have an admin role.
 - OAuth callback: Supabase redirects back to the app's `/auth/callback` route, where the session is exchanged and the user is sent to `/dashboard`.
 

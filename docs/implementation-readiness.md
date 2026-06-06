@@ -10,7 +10,7 @@ The project is ready to begin implementation.
 - Hosting: Next.js on Vercel.
 - Backend/API: Next.js server-side code on Vercel.
 - Database/Auth: Supabase.
-- Auth method: Google SSO through Supabase Auth, with Supabase email magic link kept as fallback.
+- Auth method: Google SSO through Supabase Auth.
 - Participant self-submission lock: all matches on a given day lock at the earlier of 12:00 Israel time and the first kickoff of that day.
 - Admin override: admins can enter or correct bets after lock with a required audit-log reason.
 - Leaderboard: visible standings update only when admin publishes a snapshot.
