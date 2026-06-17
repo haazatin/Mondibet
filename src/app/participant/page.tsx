@@ -1,6 +1,11 @@
 import { redirect } from "next/navigation";
 import { signOut } from "@/app/auth/actions";
 import {
+  LockedParticipantBets,
+  type LockedParticipantBet,
+  type LockedParticipantBetMatch,
+} from "@/app/participant/bets/locked-participant-bets";
+import {
   BonusBettingPanel,
   type BonusGroup,
   type GeneralBonusBet,
@@ -45,6 +50,16 @@ interface GroupBonusBetRow {
   predicted_first_team_id: string | null;
   predicted_second_team_id: string | null;
   predicted_third_team_id: string | null;
+  submitted_at: string;
+}
+
+interface VisibleMatchBetRow {
+  match_id: string;
+  participant_id: string;
+  participant_name: string;
+  predicted_home_score_90: number;
+  predicted_away_score_90: number;
+  predicted_advancing_team_id: string | null;
   submitted_at: string;
 }
 
@@ -132,6 +147,11 @@ export default async function ParticipantPage() {
         p_tournament_id: current.tournamentId,
       })
     : { data: [] };
+  const { data: visibleMatchBetRows } = current.tournamentId
+    ? await supabase.rpc("get_visible_match_bets", {
+        p_tournament_id: current.tournamentId,
+      })
+    : { data: [] };
 
   const normalizedBets = (bets ?? []) as MatchBetRow[];
   const betsByMatchId = new Map(normalizedBets.map((bet) => [bet.match_id, bet]));
@@ -192,6 +212,44 @@ export default async function ParticipantPage() {
   const pendingSubmittedMatches = normalizedMatches.filter(
     (match) => match.bet && !completedMatchIds.has(match.id),
   );
+  const visibleMatchBets = (visibleMatchBetRows ?? []) as VisibleMatchBetRow[];
+  const visibleMatchBetsByMatchId = new Map<string, LockedParticipantBet[]>();
+
+  for (const bet of visibleMatchBets) {
+    const currentBets = visibleMatchBetsByMatchId.get(bet.match_id) ?? [];
+    currentBets.push({
+      participant_id: bet.participant_id,
+      participant_name: bet.participant_name,
+      predicted_home_score_90: bet.predicted_home_score_90,
+      predicted_away_score_90: bet.predicted_away_score_90,
+      predicted_advancing_team_id: bet.predicted_advancing_team_id,
+      submitted_at: bet.submitted_at,
+    });
+    visibleMatchBetsByMatchId.set(bet.match_id, currentBets);
+  }
+
+  const lockedParticipantBetMatches: LockedParticipantBetMatch[] = normalizedMatches
+    .filter((match) => visibleMatchBetsByMatchId.has(match.id))
+    .sort((first, second) => {
+      const lockDelta =
+        new Date(second.daily_lock_at).getTime() - new Date(first.daily_lock_at).getTime();
+
+      if (lockDelta !== 0) {
+        return lockDelta;
+      }
+
+      return second.sort_order - first.sort_order;
+    })
+    .slice(0, 5)
+    .map((match) => ({
+      id: match.id,
+      sort_order: match.sort_order,
+      starts_at: match.starts_at,
+      daily_lock_at: match.daily_lock_at,
+      home_team: match.home_team,
+      away_team: match.away_team,
+      bets: visibleMatchBetsByMatchId.get(match.id) ?? [],
+    }));
   const completedBetCount =
     ((completedMatchResults ?? []) as CompletedMatchResult[]).length +
     ((completedBonusResults ?? []) as CompletedBonusResult[]).length;
@@ -253,6 +311,11 @@ export default async function ParticipantPage() {
           <h2>Your Next Bets</h2>
           <p>Your submitted match bets until the admin enters results.</p>
           <VisibleMatchBets matches={pendingSubmittedMatches} />
+        </article>
+        <article className="panel wide-panel">
+          <h2>Locked Match Bets</h2>
+          <p>All participant bets become visible after each match locks.</p>
+          <LockedParticipantBets matches={lockedParticipantBetMatches} />
         </article>
         <article className="panel wide-panel">
           <h2>Completed Bets</h2>

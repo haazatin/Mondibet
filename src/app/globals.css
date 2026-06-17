@@ -450,6 +450,10 @@ textarea {
   font-weight: 700;
 }
 
+.compact-table {
+  min-width: 420px;
+}
+
 .empty-state {
   color: var(--muted);
   margin: 18px 0 0;
