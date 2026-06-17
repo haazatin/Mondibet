@@ -3,7 +3,7 @@ import Link from "next/link";
 const cards = [
   {
     title: "Participant Betting",
-    body: "Daily match bets lock for everyone at 12:00 Israel time or the first kickoff of the day, whichever comes first.",
+    body: "Match bets lock seven hours before each kickoff.",
   },
   {
     title: "Admin Control",

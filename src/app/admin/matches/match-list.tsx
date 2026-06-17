@@ -31,7 +31,7 @@ export function MatchList({ matches }: MatchListProps) {
             <th>Stage</th>
             <th>Match</th>
             <th>Kickoff</th>
-            <th>Daily lock</th>
+            <th>Bet lock</th>
             <th>Result</th>
             <th>Action</th>
           </tr>

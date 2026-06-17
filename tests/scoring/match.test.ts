@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getDailyBettingLockTime, parseIsraelDateTimeLocal } from "@/lib/scoring/deadlines";
+import { getMatchBettingLockTime, parseIsraelDateTimeLocal } from "@/lib/scoring/deadlines";
 import { scoreMatchBet } from "@/lib/scoring/match";
 import type { MatchContext } from "@/types/tournament";
 
@@ -85,28 +85,17 @@ describe("scoreMatchBet", () => {
   });
 });
 
-describe("getDailyBettingLockTime", () => {
-  it("locks at noon when first kickoff is after noon", () => {
-    const matchDay = new Date("2026-06-12T00:00:00+03:00");
-    const lock = getDailyBettingLockTime(
-      [{ startsAt: new Date("2026-06-12T18:00:00+03:00") }],
-      matchDay,
-    );
-
-    expect(lock.toISOString()).toBe("2026-06-12T09:00:00.000Z");
-  });
-
-  it("locks at first kickoff when it is before noon", () => {
-    const matchDay = new Date("2026-06-12T00:00:00+03:00");
-    const lock = getDailyBettingLockTime(
-      [
-        { startsAt: new Date("2026-06-12T15:00:00+03:00") },
-        { startsAt: new Date("2026-06-12T11:00:00+03:00") },
-      ],
-      matchDay,
-    );
+describe("getMatchBettingLockTime", () => {
+  it("locks seven hours before kickoff", () => {
+    const lock = getMatchBettingLockTime(new Date("2026-06-12T18:00:00+03:00"));
 
     expect(lock.toISOString()).toBe("2026-06-12T08:00:00.000Z");
+  });
+
+  it("can lock on the previous Israel date for early kickoffs", () => {
+    const lock = getMatchBettingLockTime(new Date("2026-06-12T05:00:00+03:00"));
+
+    expect(lock.toISOString()).toBe("2026-06-11T19:00:00.000Z");
   });
 
   it("parses admin kickoff input as Israel wall time", () => {

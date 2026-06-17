@@ -14,13 +14,11 @@ The legacy Excel workbook is not authoritative for rules. It may be used only as
 
 ### Daily Match Bets
 
-- Each participant must submit bets for all matches played that day.
-- Submission deadline: no later than 12:00 Israel time on the same day.
+- Each participant may submit a bet for each match before that match's lock time.
+- Submission deadline: no later than seven hours before the match kickoff.
 - After a match begins, its bet cannot be changed or updated.
-- Participant self-submission for all matches on a given day locks at the earlier of:
-  - 12:00 Israel time on the match day.
-  - The kickoff time of the first match played that day.
-- Example: if the first match of the day starts at 11:00, all participant bets for that day's matches lock at 11:00.
+- Participant self-submission locks separately per match, seven hours before that match's kickoff.
+- Example: if a match starts at 22:00 Israel time, participant self-submission for that match locks at 15:00 Israel time.
 - Admins may enter or correct bets for participants after lock when needed.
 - Every admin late entry or correction must include an audit-log reason.
 

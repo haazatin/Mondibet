@@ -12,14 +12,14 @@
 
 1. Participant signs in.
 2. Participant opens today's matches.
-3. App shows each match, kickoff time, and the daily betting deadline.
+3. App shows each match, kickoff time, and the bet lock time.
 4. Participant enters exact score for each match.
 5. For knockout matches, if predicting a draw after 90 minutes, participant also chooses the advancing team.
 6. Participant submits bets.
 7. Backend validates:
    - participant identity,
    - match belongs to active tournament,
-   - daily betting deadline has not passed,
+   - match bet lock time has not passed,
    - required fields are present.
 8. Bet is saved and confirmation is shown.
 
@@ -51,7 +51,7 @@
 2. Admin enters or imports teams.
 3. Admin assigns teams to groups.
 4. Admin creates matches and kickoff times.
-5. App derives each day's betting deadline as the earlier of 12:00 Israel time and the first kickoff of that day.
+5. App derives each match's betting deadline as seven hours before kickoff.
 6. Admin invites participants.
 
 ## Admin: Enter Official Result

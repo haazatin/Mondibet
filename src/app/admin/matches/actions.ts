@@ -3,10 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getCurrentUserRole } from "@/lib/auth/roles";
 import {
-  getDailyBettingLockTimeForKickoffs,
-  getIsraelDayStartForDate,
-  getIsraelMatchDay,
-  getNextIsraelMatchDay,
+  getMatchBettingLockTime,
   parseIsraelDateTimeLocal,
 } from "@/lib/scoring/deadlines";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -58,25 +55,7 @@ export async function addMatch(
     return { status: "error", message: "Only admins can add matches." };
   }
 
-  const matchDay = getIsraelMatchDay(startsAt);
-  const dayStart = getIsraelDayStartForDate(matchDay);
-  const nextDayStart = getIsraelDayStartForDate(getNextIsraelMatchDay(matchDay));
-
-  const { data: existingMatches, error: existingError } = await supabase
-    .from("matches")
-    .select("id,starts_at")
-    .eq("tournament_id", current.tournamentId)
-    .gte("starts_at", dayStart.toISOString())
-    .lt("starts_at", nextDayStart.toISOString());
-
-  if (existingError) {
-    return { status: "error", message: existingError.message };
-  }
-
-  const dailyLockAt = getDailyBettingLockTimeForKickoffs(
-    [...(existingMatches ?? []).map((match) => new Date(match.starts_at)), startsAt],
-    dayStart,
-  );
+  const dailyLockAt = getMatchBettingLockTime(startsAt);
 
   const { error: insertError } = await supabase.from("matches").insert({
     tournament_id: current.tournamentId,
@@ -92,20 +71,6 @@ export async function addMatch(
 
   if (insertError) {
     return { status: "error", message: insertError.message };
-  }
-
-  if (existingMatches && existingMatches.length > 0) {
-    const { error: updateError } = await supabase
-      .from("matches")
-      .update({ daily_lock_at: dailyLockAt.toISOString() })
-      .in(
-        "id",
-        existingMatches.map((match) => match.id),
-      );
-
-    if (updateError) {
-      return { status: "error", message: updateError.message };
-    }
   }
 
   revalidatePath("/admin");

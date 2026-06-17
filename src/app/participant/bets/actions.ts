@@ -74,7 +74,7 @@ export async function saveMatchBet(
   const dailyLockAt = new Date(match.daily_lock_at);
 
   if (Date.now() >= dailyLockAt.getTime()) {
-    return { status: "error", message: "Betting is locked for this match day." };
+    return { status: "error", message: "Betting is locked for this match." };
   }
 
   const isDrawPrediction = predictedHomeScore90 === predictedAwayScore90;

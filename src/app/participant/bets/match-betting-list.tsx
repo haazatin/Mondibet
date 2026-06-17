@@ -104,7 +104,7 @@ function MatchBetCard({ match }: { match: ParticipantMatch }) {
           <dd>{formatDate(match.starts_at)}</dd>
         </div>
         <div>
-          <dt>Daily lock</dt>
+          <dt>Bet lock</dt>
           <dd>{formatDate(match.daily_lock_at)}</dd>
         </div>
       </dl>

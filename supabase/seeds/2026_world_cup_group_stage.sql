@@ -243,16 +243,7 @@ begin
   order by seed.sort_order;
 
   update public.matches matches
-  set daily_lock_at = least(
-    ((timezone('Asia/Jerusalem', matches.starts_at)::date::timestamp + time '12:00') at time zone 'Asia/Jerusalem'),
-    (
-      select min(day_matches.starts_at)
-      from public.matches day_matches
-      where day_matches.tournament_id = matches.tournament_id
-        and timezone('Asia/Jerusalem', day_matches.starts_at)::date =
-            timezone('Asia/Jerusalem', matches.starts_at)::date
-    )
-  )
+  set daily_lock_at = matches.starts_at - interval '7 hours'
   where matches.tournament_id = v_tournament_id;
 end $$;
 

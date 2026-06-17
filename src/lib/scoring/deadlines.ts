@@ -1,51 +1,7 @@
-export function getDailyBettingLockTime(matches: { startsAt: Date }[], matchDay: Date): Date {
-  const noon = getIsraelNoonForDate(getIsraelMatchDay(matchDay));
+const matchBetLockOffsetMs = 7 * 60 * 60 * 1000;
 
-  const firstKickoff = matches
-    .map((match) => match.startsAt)
-    .sort((a, b) => a.getTime() - b.getTime())[0];
-
-  if (!firstKickoff) {
-    return noon;
-  }
-
-  return firstKickoff.getTime() < noon.getTime() ? firstKickoff : noon;
-}
-
-export function getDailyBettingLockTimeForKickoffs(kickoffs: Date[], matchDay: Date): Date {
-  return getDailyBettingLockTime(
-    kickoffs.map((startsAt) => ({ startsAt })),
-    matchDay,
-  );
-}
-
-export function getIsraelMatchDay(date: Date): string {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Jerusalem",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(date);
-}
-
-export function getNextIsraelMatchDay(matchDay: string): string {
-  const nextDay = new Date(`${matchDay}T12:00:00.000Z`);
-  nextDay.setUTCDate(nextDay.getUTCDate() + 1);
-
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "UTC",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(nextDay);
-}
-
-export function getIsraelDayStartForDate(matchDay: string): Date {
-  return getIsraelDateForWallTime(matchDay, 0, 0);
-}
-
-export function getIsraelNoonForDate(matchDay: string): Date {
-  return getIsraelDateForWallTime(matchDay, 12, 0);
+export function getMatchBettingLockTime(startsAt: Date): Date {
+  return new Date(startsAt.getTime() - matchBetLockOffsetMs);
 }
 
 export function parseIsraelDateTimeLocal(value: string): Date | null {

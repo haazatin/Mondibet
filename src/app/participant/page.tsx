@@ -228,7 +228,7 @@ export default async function ParticipantPage() {
         </article>
         <article className="panel wide-panel">
           <h2>Today&apos;s Bets</h2>
-          <p>Submit and update match bets until the shared daily lock time.</p>
+          <p>Submit match bets until seven hours before kickoff.</p>
           {matchesError || betsError ? (
             <p className="form-message error">
               {matchesError?.message ?? betsError?.message}

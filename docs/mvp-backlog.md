@@ -33,7 +33,7 @@
 
 - Participant dashboard.
 - Daily match betting form.
-- Daily lock enforcement: earlier of 12:00 Israel time and first kickoff of the day.
+- Match lock enforcement: seven hours before each kickoff.
 - Knockout betting behavior for 90-minute draw and advancing team.
 - Pre-tournament bonus form.
 - Bet confirmation and locked-state views.

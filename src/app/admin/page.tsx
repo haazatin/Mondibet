@@ -350,7 +350,7 @@ export default async function AdminPage() {
           <SetupLists teams={teams ?? []} groups={groups ?? []} groupTeams={normalizedGroupTeams} />
         </CollapsibleAdminPanel>
         <CollapsibleAdminPanel
-          description="Create fixtures. The daily lock is calculated from the first kickoff of each day."
+          description="Create fixtures. Match betting locks seven hours before kickoff."
           title="Matches"
         >
           <MatchForm teams={teams ?? []} groups={groups ?? []} />
