@@ -30,7 +30,7 @@ const initialState: MatchBetActionState = {
 };
 
 const knockoutStages = new Set(["round_of_32", "round_of_16", "quarterfinal", "semifinal", "final"]);
-const defaultVisibleMatchCount = 5;
+const defaultVisibleMatchCount = 7;
 
 export function MatchBettingList({ matches }: MatchBettingListProps) {
   const [showAll, setShowAll] = useState(false);
