@@ -72,11 +72,13 @@ Knockout interpretation:
 
 - The result score is the score after 90 minutes.
 - The "winner/draw" scoring item should be interpreted as:
-  - For non-draw 90-minute results: correct 90-minute winner.
+  - For non-draw 90-minute predictions: correct 90-minute winner.
+  - For knockout draw predictions: correct selected advancing team.
   - For draw 90-minute results: correct prediction of draw plus correct advancing team.
 - The advancing team is required only when the participant predicts a draw after 90 minutes.
 - Correctly selecting the advancing team does not create a separate bonus category.
-- The advancing-team selection is part of determining whether a knockout draw prediction earns the normal stage outcome points.
+- The advancing-team selection is part of determining whether a knockout draw prediction earns the normal stage outcome points, even if the selected team wins during 90 minutes.
+- A knockout draw prediction does not earn goal-difference bonus points.
 
 ## Group Bonus Bets
 

@@ -24,7 +24,11 @@ export function scoreMatchBet(
   const exactScorePoints = exactScore ? points.exactScore : 0;
   const outcomePoints = outcomeCorrect ? points.outcome : 0;
   const goalDifferencePoints =
-    outcomeCorrect && !exactScore && isGoalDifferenceCorrect(bet, result) && resultOutcome(result) !== "draw"
+    outcomeCorrect &&
+    !exactScore &&
+    betOutcome(bet) !== "draw" &&
+    isGoalDifferenceCorrect(bet, result) &&
+    resultOutcome(result) !== "draw"
       ? points.goalDifference
       : 0;
 
@@ -64,15 +68,19 @@ function isOutcomeCorrect(context: MatchContext, bet: MatchBet, result: MatchRes
   const actualOutcome = resultOutcome(result);
   const predictedOutcome = betOutcome(bet);
 
-  if (actualOutcome !== predictedOutcome) {
-    return false;
+  if (context.stage === "group") {
+    return actualOutcome === predictedOutcome;
   }
 
-  if (context.stage === "group" || actualOutcome !== "draw") {
-    return true;
+  if (predictedOutcome === "draw") {
+    const actualAdvancingTeamId = getActualAdvancingTeamId(context, result, actualOutcome);
+
+    return Boolean(
+      actualAdvancingTeamId && bet.predictedAdvancingTeamId === actualAdvancingTeamId,
+    );
   }
 
-  return Boolean(result.advancingTeamId && bet.predictedAdvancingTeamId === result.advancingTeamId);
+  return actualOutcome === predictedOutcome;
 }
 
 function isGoalDifferenceCorrect(bet: MatchBet, result: MatchResult): boolean {
@@ -82,3 +90,18 @@ function isGoalDifferenceCorrect(bet: MatchBet, result: MatchResult): boolean {
   );
 }
 
+function getActualAdvancingTeamId(
+  context: MatchContext,
+  result: MatchResult,
+  actualOutcome: MatchOutcome,
+): string | undefined {
+  if (actualOutcome === "home") {
+    return context.homeTeamId;
+  }
+
+  if (actualOutcome === "away") {
+    return context.awayTeamId;
+  }
+
+  return result.advancingTeamId;
+}

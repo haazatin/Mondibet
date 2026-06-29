@@ -70,6 +70,58 @@ describe("scoreMatchBet", () => {
     ).toBe(12);
   });
 
+  it("awards knockout outcome points when a predicted draw selects the actual 90-minute winner", () => {
+    expect(
+      scoreMatchBet(
+        knockoutContext,
+        {
+          predictedHomeScore90: 1,
+          predictedAwayScore90: 1,
+          predictedAdvancingTeamId: "home",
+        },
+        { homeScore90: 2, awayScore90: 1 },
+      ),
+    ).toEqual({
+      outcomePoints: 6,
+      exactScorePoints: 0,
+      goalDifferencePoints: 0,
+      total: 6,
+    });
+  });
+
+  it("does not award extra knockout points when a draw prediction selects the actual winner", () => {
+    expect(
+      scoreMatchBet(
+        knockoutContext,
+        {
+          predictedHomeScore90: 1,
+          predictedAwayScore90: 1,
+          predictedAdvancingTeamId: "home",
+        },
+        { homeScore90: 3, awayScore90: 1 },
+      ),
+    ).toEqual({
+      outcomePoints: 6,
+      exactScorePoints: 0,
+      goalDifferencePoints: 0,
+      total: 6,
+    });
+  });
+
+  it("withholds knockout draw prediction points when the selected advancing team loses in 90 minutes", () => {
+    expect(
+      scoreMatchBet(
+        knockoutContext,
+        {
+          predictedHomeScore90: 1,
+          predictedAwayScore90: 1,
+          predictedAdvancingTeamId: "away",
+        },
+        { homeScore90: 2, awayScore90: 1 },
+      ).total,
+    ).toBe(0);
+  });
+
   it("withholds knockout draw outcome points when advancing team is wrong", () => {
     expect(
       scoreMatchBet(
