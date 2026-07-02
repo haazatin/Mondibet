@@ -67,6 +67,8 @@ The knockout scoring varies by round.
 Additional knockout rule:
 
 - If the participant predicts the correct winner and correct goal difference, but not the exact score, award 2 additional points.
+- If the participant predicts a non-draw 90-minute winner, the actual 90-minute result is a draw, and the predicted winner advances, award exactly 2 points for correct advancing team.
+- This 2-point advancing-team credit counts as a correct match for streak purposes.
 
 Knockout interpretation:
 
@@ -79,6 +81,7 @@ Knockout interpretation:
 - Correctly selecting the advancing team does not create a separate bonus category.
 - The advancing-team selection is part of determining whether a knockout draw prediction earns the normal stage outcome points, even if the selected team wins during 90 minutes.
 - A knockout draw prediction does not earn goal-difference bonus points.
+- The 2-point advancing-team credit for a non-draw prediction against an actual draw does not stack with normal outcome, exact-score, or goal-difference points.
 
 ## Group Bonus Bets
 

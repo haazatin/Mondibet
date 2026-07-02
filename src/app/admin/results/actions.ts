@@ -195,6 +195,11 @@ export async function recalculateMatchScores({
         points: breakdown.goalDifferencePoints,
         reason: "Correct goal difference",
       },
+      {
+        category: "advancing_team",
+        points: breakdown.advancingTeamPoints,
+        reason: "Correct advancing team",
+      },
     ]
       .filter((event) => event.points > 0)
       .map((event) => ({
@@ -320,7 +325,7 @@ export async function recalculateTournamentStreakScores(
         },
       );
 
-      return breakdown.outcomePoints > 0;
+      return breakdown.streakCorrect;
     });
 
     const streak = scoreStreakBonuses(correctOutcomes);

@@ -5,6 +5,8 @@ export interface MatchScoreBreakdown {
   outcomePoints: number;
   exactScorePoints: number;
   goalDifferencePoints: number;
+  advancingTeamPoints: number;
+  streakCorrect: boolean;
   total: number;
 }
 
@@ -20,6 +22,7 @@ export function scoreMatchBet(
   const outcomeCorrect = isOutcomeCorrect(context, bet, result);
   const points =
     context.stage === "group" ? GROUP_STAGE_POINTS : KNOCKOUT_STAGE_POINTS[context.stage];
+  const advancingTeamCreditCorrect = isAdvancingTeamCreditCorrect(context, bet, result);
 
   const exactScorePoints = exactScore ? points.exactScore : 0;
   const outcomePoints = outcomeCorrect ? points.outcome : 0;
@@ -31,12 +34,16 @@ export function scoreMatchBet(
     resultOutcome(result) !== "draw"
       ? points.goalDifference
       : 0;
+  const advancingTeamPoints = advancingTeamCreditCorrect ? 2 : 0;
+  const streakCorrect = outcomeCorrect || advancingTeamCreditCorrect;
 
   return {
     outcomePoints,
     exactScorePoints,
     goalDifferencePoints,
-    total: outcomePoints + exactScorePoints + goalDifferencePoints,
+    advancingTeamPoints,
+    streakCorrect,
+    total: outcomePoints + exactScorePoints + goalDifferencePoints + advancingTeamPoints,
   };
 }
 
@@ -88,6 +95,27 @@ function isGoalDifferenceCorrect(bet: MatchBet, result: MatchResult): boolean {
     bet.predictedHomeScore90 - bet.predictedAwayScore90 ===
     result.homeScore90 - result.awayScore90
   );
+}
+
+function isAdvancingTeamCreditCorrect(
+  context: MatchContext,
+  bet: MatchBet,
+  result: MatchResult,
+): boolean {
+  if (context.stage === "group") {
+    return false;
+  }
+
+  const predictedOutcome = betOutcome(bet);
+  const actualOutcome = resultOutcome(result);
+
+  if (predictedOutcome === "draw" || actualOutcome !== "draw") {
+    return false;
+  }
+
+  const predictedTeamId = predictedOutcome === "home" ? context.homeTeamId : context.awayTeamId;
+
+  return Boolean(result.advancingTeamId && result.advancingTeamId === predictedTeamId);
 }
 
 function getActualAdvancingTeamId(

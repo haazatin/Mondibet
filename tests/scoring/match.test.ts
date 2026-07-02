@@ -27,6 +27,8 @@ describe("scoreMatchBet", () => {
       outcomePoints: 5,
       exactScorePoints: 5,
       goalDifferencePoints: 0,
+      advancingTeamPoints: 0,
+      streakCorrect: true,
       total: 10,
     });
   });
@@ -52,6 +54,8 @@ describe("scoreMatchBet", () => {
       outcomePoints: 5,
       exactScorePoints: 0,
       goalDifferencePoints: 0,
+      advancingTeamPoints: 0,
+      streakCorrect: true,
       total: 5,
     });
   });
@@ -85,6 +89,8 @@ describe("scoreMatchBet", () => {
       outcomePoints: 6,
       exactScorePoints: 0,
       goalDifferencePoints: 0,
+      advancingTeamPoints: 0,
+      streakCorrect: true,
       total: 6,
     });
   });
@@ -104,6 +110,8 @@ describe("scoreMatchBet", () => {
       outcomePoints: 6,
       exactScorePoints: 0,
       goalDifferencePoints: 0,
+      advancingTeamPoints: 0,
+      streakCorrect: true,
       total: 6,
     });
   });
@@ -120,6 +128,66 @@ describe("scoreMatchBet", () => {
         { homeScore90: 2, awayScore90: 1 },
       ).total,
     ).toBe(0);
+  });
+
+  it("awards two points and streak credit when a predicted knockout winner advances after a 90-minute draw", () => {
+    expect(
+      scoreMatchBet(
+        knockoutContext,
+        {
+          predictedHomeScore90: 1,
+          predictedAwayScore90: 0,
+        },
+        { homeScore90: 1, awayScore90: 1, advancingTeamId: "home" },
+      ),
+    ).toEqual({
+      outcomePoints: 0,
+      exactScorePoints: 0,
+      goalDifferencePoints: 0,
+      advancingTeamPoints: 2,
+      streakCorrect: true,
+      total: 2,
+    });
+  });
+
+  it("withholds advancing-team credit when the predicted knockout winner loses after a 90-minute draw", () => {
+    expect(
+      scoreMatchBet(
+        knockoutContext,
+        {
+          predictedHomeScore90: 1,
+          predictedAwayScore90: 0,
+        },
+        { homeScore90: 1, awayScore90: 1, advancingTeamId: "away" },
+      ),
+    ).toEqual({
+      outcomePoints: 0,
+      exactScorePoints: 0,
+      goalDifferencePoints: 0,
+      advancingTeamPoints: 0,
+      streakCorrect: false,
+      total: 0,
+    });
+  });
+
+  it("does not award advancing-team credit when the actual knockout result is not a draw", () => {
+    expect(
+      scoreMatchBet(
+        knockoutContext,
+        {
+          predictedHomeScore90: 1,
+          predictedAwayScore90: 0,
+        },
+        { homeScore90: 2, awayScore90: 0 },
+      ),
+    ).toEqual({
+      outcomePoints: 6,
+      exactScorePoints: 0,
+      goalDifferencePoints: 0,
+      advancingTeamPoints: 0,
+      streakCorrect: true,
+      total: 6,
+    });
   });
 
   it("withholds knockout draw outcome points when advancing team is wrong", () => {
