@@ -1,3 +1,5 @@
+import { getFlagEmojiForTeam } from "@/lib/teams/flags";
+
 interface PublishedLeaderboardProps {
   publishedAt?: string | null;
   rows: {
@@ -9,6 +11,8 @@ interface PublishedLeaderboardProps {
     bonus_points: number;
     streak_points: number;
     participant_name: string;
+    champion_team_name?: string | null;
+    champion_team_code?: string | null;
   }[];
 }
 
@@ -33,16 +37,36 @@ export function PublishedLeaderboard({ publishedAt, rows }: PublishedLeaderboard
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => (
-              <tr key={row.row_id}>
-                <td>{row.rank}</td>
-                <td>{row.participant_name}</td>
-                <td>{row.total_points}</td>
-                <td>{row.group_stage_points + row.knockout_points}</td>
-                <td>{row.bonus_points}</td>
-                <td>{row.streak_points}</td>
-              </tr>
-            ))}
+            {rows.map((row) => {
+              const championFlag = getFlagEmojiForTeam({
+                fifaCode: row.champion_team_code,
+                name: row.champion_team_name,
+              });
+
+              return (
+                <tr key={row.row_id}>
+                  <td>{row.rank}</td>
+                  <td>
+                    <span className="leaderboard-participant">
+                      {championFlag ? (
+                        <span
+                          aria-label={`Champion pick: ${row.champion_team_name ?? row.champion_team_code}`}
+                          className="champion-flag"
+                          title={row.champion_team_name ?? row.champion_team_code ?? undefined}
+                        >
+                          {championFlag}
+                        </span>
+                      ) : null}
+                      <span>{row.participant_name}</span>
+                    </span>
+                  </td>
+                  <td>{row.total_points}</td>
+                  <td>{row.group_stage_points + row.knockout_points}</td>
+                  <td>{row.bonus_points}</td>
+                  <td>{row.streak_points}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

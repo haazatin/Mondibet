@@ -35,6 +35,9 @@ interface PublishedLeaderboardRow {
   knockout_points: number;
   bonus_points: number;
   streak_points: number;
+  champion_team_id: string | null;
+  champion_team_name: string | null;
+  champion_team_code: string | null;
 }
 
 interface MatchBetRow {

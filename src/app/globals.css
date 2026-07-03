@@ -450,6 +450,21 @@ textarea {
   font-weight: 700;
 }
 
+.leaderboard-participant {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.champion-flag {
+  display: inline-flex;
+  font-size: 18px;
+  justify-content: center;
+  line-height: 1;
+  min-width: 1.4em;
+}
+
 .compact-table {
   min-width: 420px;
 }
