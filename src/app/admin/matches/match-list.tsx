@@ -1,4 +1,8 @@
+"use client";
+
+import { useActionState } from "react";
 import { deleteDraftMatch } from "@/app/admin/matches/actions";
+import type { MatchActionState } from "@/app/admin/matches/actions";
 
 interface MatchListProps {
   matches: {
@@ -16,6 +20,11 @@ interface MatchListProps {
     } | null;
   }[];
 }
+
+const initialDeleteState: MatchActionState = {
+  status: "idle",
+  message: "",
+};
 
 export function MatchList({ matches }: MatchListProps) {
   if (matches.length === 0) {
@@ -38,34 +47,54 @@ export function MatchList({ matches }: MatchListProps) {
         </thead>
         <tbody>
           {matches.map((match) => (
-            <tr key={match.id}>
-              <td>{match.sort_order}</td>
-              <td>{formatStage(match.stage, match.groups?.name)}</td>
-              <td>
-                {match.home_team?.name ?? "TBD"} vs {match.away_team?.name ?? "TBD"}
-              </td>
-              <td>{formatDate(match.starts_at)}</td>
-              <td>{formatDate(match.daily_lock_at)}</td>
-              <td>
-                {match.result
-                  ? `${match.result.home_score_90}-${match.result.away_score_90}`
-                  : "Pending"}
-              </td>
-              <td>
-                {match.result ? null : (
-                  <form action={deleteDraftMatch}>
-                    <input name="matchId" type="hidden" value={match.id} />
-                    <button className="secondary-button" type="submit">
-                      Delete
-                    </button>
-                  </form>
-                )}
-              </td>
-            </tr>
+            <MatchRow key={match.id} match={match} />
           ))}
         </tbody>
       </table>
     </div>
+  );
+}
+
+function MatchRow({ match }: { match: MatchListProps["matches"][number] }) {
+  const [state, formAction, pending] = useActionState(deleteDraftMatch, initialDeleteState);
+
+  return (
+    <tr>
+      <td>{match.sort_order}</td>
+      <td>{formatStage(match.stage, match.groups?.name)}</td>
+      <td>
+        {match.home_team?.name ?? "TBD"} vs {match.away_team?.name ?? "TBD"}
+      </td>
+      <td>{formatDate(match.starts_at)}</td>
+      <td>{formatDate(match.daily_lock_at)}</td>
+      <td>
+        {match.result ? `${match.result.home_score_90}-${match.result.away_score_90}` : "Pending"}
+      </td>
+      <td>
+        {match.result ? null : (
+          <>
+            <form
+              action={formAction}
+              onSubmit={(event) => {
+                if (!window.confirm("Delete this match and any submitted bets for it?")) {
+                  event.preventDefault();
+                }
+              }}
+            >
+              <input name="matchId" type="hidden" value={match.id} />
+              <button className="secondary-button" disabled={pending} type="submit">
+                {pending ? "Deleting..." : "Delete"}
+              </button>
+            </form>
+            {state.message ? (
+              <p className={state.status === "error" ? "form-message error" : "form-message"}>
+                {state.message}
+              </p>
+            ) : null}
+          </>
+        )}
+      </td>
+    </tr>
   );
 }
 
