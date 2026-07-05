@@ -181,6 +181,20 @@ export default async function AdminPage() {
       predicted_advancing_team_id: bet.predicted_advancing_team_id,
       submitted_at: bet.submitted_at,
     })) ?? [];
+  const bettorNamesByMatchId = new Map<string, string[]>();
+
+  for (const bet of normalizedMatchBets) {
+    const currentBettorNames = bettorNamesByMatchId.get(bet.match_id) ?? [];
+    currentBettorNames.push(bet.participant_name);
+    bettorNamesByMatchId.set(bet.match_id, currentBettorNames);
+  }
+
+  const setupMatches = normalizedMatches.map((match) => ({
+    ...match,
+    bettorNames: Array.from(new Set(bettorNamesByMatchId.get(match.id) ?? [])).sort((a, b) =>
+      a.localeCompare(b),
+    ),
+  }));
   const normalizedGroupBonusBets =
     groupBonusBets?.map((bet) => ({
       group_id: bet.group_id,
@@ -354,7 +368,7 @@ export default async function AdminPage() {
           title="Matches"
         >
           <MatchForm teams={teams ?? []} groups={groups ?? []} />
-          <MatchList matches={normalizedMatches} />
+          <MatchList matches={setupMatches} />
         </CollapsibleAdminPanel>
         <CollapsibleAdminPanel
           description="Draft score events generated from official results and submitted bets."

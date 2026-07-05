@@ -14,6 +14,7 @@ interface MatchListProps {
     groups: { name: string } | null;
     home_team: { name: string } | null;
     away_team: { name: string } | null;
+    bettorNames?: string[];
     result?: {
       home_score_90: number;
       away_score_90: number;
@@ -76,7 +77,7 @@ function MatchRow({ match }: { match: MatchListProps["matches"][number] }) {
             <form
               action={formAction}
               onSubmit={(event) => {
-                if (!window.confirm("Delete this match and any submitted bets for it?")) {
+                if (!window.confirm(buildDeleteConfirmation(match))) {
                   event.preventDefault();
                 }
               }}
@@ -96,6 +97,19 @@ function MatchRow({ match }: { match: MatchListProps["matches"][number] }) {
       </td>
     </tr>
   );
+}
+
+function buildDeleteConfirmation(match: MatchListProps["matches"][number]): string {
+  const matchName = `${match.home_team?.name ?? "TBD"} vs ${match.away_team?.name ?? "TBD"}`;
+  const bettorNames = match.bettorNames ?? [];
+
+  if (bettorNames.length === 0) {
+    return `Delete ${matchName}?\n\nNo submitted bets were found for this match.`;
+  }
+
+  return `Delete ${matchName} and ${bettorNames.length} submitted bet${
+    bettorNames.length === 1 ? "" : "s"
+  }?\n\nParticipants with bets:\n${bettorNames.map((name) => `- ${name}`).join("\n")}`;
 }
 
 function formatStage(stage: string, groupName: string | undefined): string {
